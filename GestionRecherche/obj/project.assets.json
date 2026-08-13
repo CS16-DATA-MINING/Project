@@ -8,24 +8,26 @@
     "net10.0": []
   },
   "packageFolders": {
-    "C:\\Users\\user\\.nuget\\packages\\": {}
+    "C:\\Users\\dell\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\Project\\GestionRecherche\\GestionRecherche.csproj",
+      "projectUniqueName": "C:\\Users\\dell\\.NET\\Project\\GestionRecherche\\GestionRecherche.csproj",
       "projectName": "GestionRecherche",
-      "projectPath": "D:\\Project\\GestionRecherche\\GestionRecherche.csproj",
-      "packagesPath": "C:\\Users\\user\\.nuget\\packages\\",
-      "outputPath": "D:\\Project\\GestionRecherche\\obj\\",
+      "projectPath": "C:\\Users\\dell\\.NET\\Project\\GestionRecherche\\GestionRecherche.csproj",
+      "packagesPath": "C:\\Users\\dell\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\dell\\.NET\\Project\\GestionRecherche\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "C:\\Users\\user\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        "C:\\Users\\dell\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
         "net10.0"
       ],
       "sources": {
+        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {

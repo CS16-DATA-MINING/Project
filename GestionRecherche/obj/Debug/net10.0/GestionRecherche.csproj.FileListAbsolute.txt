@@ -95,3 +95,15 @@ D:\Project\GestionRecherche\obj\Debug\net10.0\refint\GestionRecherche.dll
 D:\Project\GestionRecherche\obj\Debug\net10.0\GestionRecherche.pdb
 D:\Project\GestionRecherche\obj\Debug\net10.0\GestionRecherche.genruntimeconfig.cache
 D:\Project\GestionRecherche\obj\Debug\net10.0\ref\GestionRecherche.dll
+C:\Users\dell\.NET\Project\GestionRecherche\obj\Debug\net10.0\rpswa.dswa.cache.json
+C:\Users\dell\.NET\Project\GestionRecherche\obj\Debug\net10.0\GestionRecherche.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\dell\.NET\Project\GestionRecherche\obj\Debug\net10.0\GestionRecherche.AssemblyInfoInputs.cache
+C:\Users\dell\.NET\Project\GestionRecherche\obj\Debug\net10.0\GestionRecherche.AssemblyInfo.cs
+C:\Users\dell\.NET\Project\GestionRecherche\obj\Debug\net10.0\GestionRecherche.csproj.CoreCompileInputs.cache
+C:\Users\dell\.NET\Project\GestionRecherche\obj\Debug\net10.0\GestionRecherche.MvcApplicationPartsAssemblyInfo.cache
+C:\Users\dell\.NET\Project\GestionRecherche\obj\Debug\net10.0\GestionRecherche.RazorAssemblyInfo.cache
+C:\Users\dell\.NET\Project\GestionRecherche\obj\Debug\net10.0\GestionRecherche.RazorAssemblyInfo.cs
+C:\Users\dell\.NET\Project\GestionRecherche\obj\Debug\net10.0\GestionRecherche.sourcelink.json
+C:\Users\dell\.NET\Project\GestionRecherche\obj\Debug\net10.0\GestionRecherche.dll
+C:\Users\dell\.NET\Project\GestionRecherche\obj\Debug\net10.0\refint\GestionRecherche.dll
+C:\Users\dell\.NET\Project\GestionRecherche\obj\Debug\net10.0\GestionRecherche.pdb
