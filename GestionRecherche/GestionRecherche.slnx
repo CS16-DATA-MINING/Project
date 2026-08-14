@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/Business/">
+    <Project Path="Business/GestionRecherche.Business.csproj" />
+  </Folder>
+  <Folder Name="/Data/">
+    <Project Path="Data/GestionRecherche.Data.csproj" />
+  </Folder>
+  <Folder Name="/Web/">
+    <Project Path="Web/GestionRecherche.Web.csproj" />
+  </Folder>
+</Solution>
