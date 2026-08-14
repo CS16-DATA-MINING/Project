@@ -22,6 +22,70 @@ namespace GestionRecherche.Data.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("GestionRecherche.Data.Anomalie", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("CommentaireTraitement")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<DateTime>("DateDetectionUtc")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("SYSUTCDATETIME()");
+
+                    b.Property<DateTime?>("DateTraitementUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("DemandePublicationId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("DureeJours")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("Statut")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasDefaultValue("Ouverte");
+
+                    b.Property<string>("TraiteeParId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DateDetectionUtc");
+
+                    b.HasIndex("TraiteeParId");
+
+                    b.HasIndex("DemandePublicationId", "Type")
+                        .IsUnique()
+                        .HasFilter("[Statut] = N'Ouverte'");
+
+                    b.ToTable("Anomalies", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_Anomalies_Duree", "[DureeJours] >= 0");
+
+                            t.HasCheckConstraint("CK_Anomalies_Traitement", "([Statut] = N'Ouverte' AND [DateTraitementUtc] IS NULL AND [TraiteeParId] IS NULL) OR ([Statut] = N'Traitee' AND [DateTraitementUtc] IS NOT NULL AND [TraiteeParId] IS NOT NULL AND [CommentaireTraitement] IS NOT NULL AND LEN(LTRIM(RTRIM([CommentaireTraitement]))) > 0)");
+                        });
+                });
+
             modelBuilder.Entity("GestionRecherche.Data.ApplicationUser", b =>
                 {
                     b.Property<string>("Id")
@@ -40,6 +104,18 @@ namespace GestionRecherche.Data.Migrations
 
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("bit");
+
+                    b.Property<bool>("EstActif")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<string>("GradeActuel")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int?>("LaboratoireId")
+                        .HasColumnType("int");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
@@ -80,11 +156,16 @@ namespace GestionRecherche.Data.Migrations
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("bit");
 
+                    b.Property<int?>("UerId")
+                        .HasColumnType("int");
+
                     b.Property<string>("UserName")
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("LaboratoireId");
 
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
@@ -94,7 +175,419 @@ namespace GestionRecherche.Data.Migrations
                         .HasDatabaseName("UserNameIndex")
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
+                    b.HasIndex("UerId");
+
                     b.ToTable("AspNetUsers", (string)null);
+                });
+
+            modelBuilder.Entity("GestionRecherche.Data.DemandePublication", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Abstract")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("AuteurId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("CheminStockagePreuve")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime?>("DateAutorisationConseilUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("DateCreationUtc")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("SYSUTCDATETIME()");
+
+                    b.Property<DateTime?>("DateDerniereMiseAJourUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DateSoumissionReelleUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("NomOriginalPreuve")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<int>("NumeroCycleValidation")
+                        .HasColumnType("int");
+
+                    b.Property<string>("NumeroSuivi")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("StatutEditeurCourant")
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<string>("StatutValidationInterne")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)")
+                        .HasDefaultValue("EnAttenteLabo");
+
+                    b.Property<string>("Titre")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
+
+                    b.Property<string>("TypeContenuPreuve")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AuteurId");
+
+                    b.HasIndex("DateAutorisationConseilUtc");
+
+                    b.HasIndex("DateDerniereMiseAJourUtc");
+
+                    b.HasIndex("StatutValidationInterne");
+
+                    b.ToTable("DemandesPublication", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_DemandesPublication_NumeroCycle", "[NumeroCycleValidation] >= 1");
+                        });
+                });
+
+            modelBuilder.Entity("GestionRecherche.Data.EtapeValidation", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Commentaire")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<DateTime>("DateDecisionUtc")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("SYSUTCDATETIME()");
+
+                    b.Property<string>("Decision")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<int>("DemandePublicationId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Niveau")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<int>("NumeroCycleValidation")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ValidateurId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DateDecisionUtc");
+
+                    b.HasIndex("ValidateurId");
+
+                    b.HasIndex("DemandePublicationId", "NumeroCycleValidation", "Niveau")
+                        .IsUnique();
+
+                    b.ToTable("EtapesValidation", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_EtapesValidation_CommentaireRejet", "([Decision] <> N'Rejetee') OR ([Commentaire] IS NOT NULL AND LEN(LTRIM(RTRIM([Commentaire]))) > 0)");
+                        });
+                });
+
+            modelBuilder.Entity("GestionRecherche.Data.HistoriqueStatutEditeur", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AncienStatut")
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<string>("Commentaire")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<DateTime>("DateChangementUtc")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("SYSUTCDATETIME()");
+
+                    b.Property<int>("DemandePublicationId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ModifieParId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("NouveauStatut")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ModifieParId");
+
+                    b.HasIndex("DemandePublicationId", "DateChangementUtc");
+
+                    b.ToTable("HistoriquesStatutEditeur", (string)null);
+                });
+
+            modelBuilder.Entity("GestionRecherche.Data.Journal", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("DateCreationUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Editeur")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("EstActif")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Issn")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("IssnNormalise")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Nom")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("NomNormalise")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Journaux");
+                });
+
+            modelBuilder.Entity("GestionRecherche.Data.JournalCibleDemande", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("DateCreationUtc")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("SYSUTCDATETIME()");
+
+                    b.Property<int>("DemandePublicationId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("EditeurSaisiManuellement")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<bool>("EstNouveauJournal")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("IssnNormalise")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("IssnSaisiManuellement")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<int?>("JournalId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("NomJournalNormalise")
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.Property<string>("NomJournalSaisiManuellement")
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.Property<int>("OrdrePreference")
+                        .HasColumnType("int");
+
+                    b.Property<string>("StatutModeration")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)")
+                        .HasDefaultValue("NonRequise");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IssnNormalise");
+
+                    b.HasIndex("JournalId");
+
+                    b.HasIndex("DemandePublicationId", "OrdrePreference")
+                        .IsUnique();
+
+                    b.ToTable("JournauxCiblesDemande", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_JournauxCiblesDemande_Ordre", "[OrdrePreference] >= 1");
+
+                            t.HasCheckConstraint("CK_JournauxCiblesDemande_Source", "([EstNouveauJournal] = 0 AND [JournalId] IS NOT NULL) OR ([EstNouveauJournal] = 1 AND [NomJournalSaisiManuellement] IS NOT NULL AND [EditeurSaisiManuellement] IS NOT NULL AND [IssnSaisiManuellement] IS NOT NULL)");
+                        });
+                });
+
+            modelBuilder.Entity("GestionRecherche.Data.Laboratoire", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ChefLaboId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ChefLaboId1")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("EstActif")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Nom")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("UerId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ChefLaboId1");
+
+                    b.HasIndex("UerId");
+
+                    b.ToTable("Laboratoires");
+                });
+
+            modelBuilder.Entity("GestionRecherche.Data.ParametreSysteme", b =>
+                {
+                    b.Property<string>("Cle")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<DateTime?>("DateDerniereModificationUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
+
+                    b.Property<string>("Unite")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<int>("Valeur")
+                        .HasColumnType("int");
+
+                    b.HasKey("Cle");
+
+                    b.ToTable("ParametresSysteme", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_ParametresSysteme_ValeurPositive", "[Valeur] > 0");
+                        });
+
+                    b.HasData(
+                        new
+                        {
+                            Cle = "MaxJournaux",
+                            Description = "Nombre maximal de journaux ciblés par demande.",
+                            Unite = "Nombre",
+                            Valeur = 3
+                        },
+                        new
+                        {
+                            Cle = "D1",
+                            Description = "Délai maximal avant déclaration de la soumission réelle.",
+                            Unite = "Jours",
+                            Valeur = 30
+                        },
+                        new
+                        {
+                            Cle = "D2",
+                            Description = "Délai maximal sans évolution du statut éditeur.",
+                            Unite = "Mois",
+                            Valeur = 6
+                        });
+                });
+
+            modelBuilder.Entity("GestionRecherche.Data.Uer", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ChefUerId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<bool>("EstActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<string>("Nom")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ChefUerId");
+
+                    b.HasIndex("Code")
+                        .IsUnique();
+
+                    b.ToTable("Uers");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -230,6 +723,136 @@ namespace GestionRecherche.Data.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("GestionRecherche.Data.Anomalie", b =>
+                {
+                    b.HasOne("GestionRecherche.Data.DemandePublication", "DemandePublication")
+                        .WithMany("Anomalies")
+                        .HasForeignKey("DemandePublicationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("GestionRecherche.Data.ApplicationUser", "TraiteePar")
+                        .WithMany()
+                        .HasForeignKey("TraiteeParId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("DemandePublication");
+
+                    b.Navigation("TraiteePar");
+                });
+
+            modelBuilder.Entity("GestionRecherche.Data.ApplicationUser", b =>
+                {
+                    b.HasOne("GestionRecherche.Data.Laboratoire", "Laboratoire")
+                        .WithMany("Membres")
+                        .HasForeignKey("LaboratoireId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("GestionRecherche.Data.Uer", "Uer")
+                        .WithMany("Membres")
+                        .HasForeignKey("UerId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Laboratoire");
+
+                    b.Navigation("Uer");
+                });
+
+            modelBuilder.Entity("GestionRecherche.Data.DemandePublication", b =>
+                {
+                    b.HasOne("GestionRecherche.Data.ApplicationUser", "Auteur")
+                        .WithMany("DemandesPublication")
+                        .HasForeignKey("AuteurId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Auteur");
+                });
+
+            modelBuilder.Entity("GestionRecherche.Data.EtapeValidation", b =>
+                {
+                    b.HasOne("GestionRecherche.Data.DemandePublication", "DemandePublication")
+                        .WithMany("EtapesValidation")
+                        .HasForeignKey("DemandePublicationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("GestionRecherche.Data.ApplicationUser", "Validateur")
+                        .WithMany()
+                        .HasForeignKey("ValidateurId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("DemandePublication");
+
+                    b.Navigation("Validateur");
+                });
+
+            modelBuilder.Entity("GestionRecherche.Data.HistoriqueStatutEditeur", b =>
+                {
+                    b.HasOne("GestionRecherche.Data.DemandePublication", "DemandePublication")
+                        .WithMany("HistoriqueStatutsEditeur")
+                        .HasForeignKey("DemandePublicationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("GestionRecherche.Data.ApplicationUser", "ModifiePar")
+                        .WithMany()
+                        .HasForeignKey("ModifieParId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("DemandePublication");
+
+                    b.Navigation("ModifiePar");
+                });
+
+            modelBuilder.Entity("GestionRecherche.Data.JournalCibleDemande", b =>
+                {
+                    b.HasOne("GestionRecherche.Data.DemandePublication", "DemandePublication")
+                        .WithMany("JournauxCibles")
+                        .HasForeignKey("DemandePublicationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("GestionRecherche.Data.Journal", "Journal")
+                        .WithMany("DemandesCibles")
+                        .HasForeignKey("JournalId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("DemandePublication");
+
+                    b.Navigation("Journal");
+                });
+
+            modelBuilder.Entity("GestionRecherche.Data.Laboratoire", b =>
+                {
+                    b.HasOne("GestionRecherche.Data.ApplicationUser", "ChefLabo")
+                        .WithMany()
+                        .HasForeignKey("ChefLaboId1");
+
+                    b.HasOne("GestionRecherche.Data.Uer", "Uer")
+                        .WithMany("Laboratoires")
+                        .HasForeignKey("UerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ChefLabo");
+
+                    b.Navigation("Uer");
+                });
+
+            modelBuilder.Entity("GestionRecherche.Data.Uer", b =>
+                {
+                    b.HasOne("GestionRecherche.Data.ApplicationUser", "ChefUer")
+                        .WithMany()
+                        .HasForeignKey("ChefUerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("ChefUer");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -279,6 +902,39 @@ namespace GestionRecherche.Data.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("GestionRecherche.Data.ApplicationUser", b =>
+                {
+                    b.Navigation("DemandesPublication");
+                });
+
+            modelBuilder.Entity("GestionRecherche.Data.DemandePublication", b =>
+                {
+                    b.Navigation("Anomalies");
+
+                    b.Navigation("EtapesValidation");
+
+                    b.Navigation("HistoriqueStatutsEditeur");
+
+                    b.Navigation("JournauxCibles");
+                });
+
+            modelBuilder.Entity("GestionRecherche.Data.Journal", b =>
+                {
+                    b.Navigation("DemandesCibles");
+                });
+
+            modelBuilder.Entity("GestionRecherche.Data.Laboratoire", b =>
+                {
+                    b.Navigation("Membres");
+                });
+
+            modelBuilder.Entity("GestionRecherche.Data.Uer", b =>
+                {
+                    b.Navigation("Laboratoires");
+
+                    b.Navigation("Membres");
                 });
 #pragma warning restore 612, 618
         }
