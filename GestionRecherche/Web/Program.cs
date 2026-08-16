@@ -1,3 +1,4 @@
+using GestionRecherche.Business;
 using GestionRecherche.Data;
 using GestionRecherche.Web;
 using Microsoft.AspNetCore.Identity;
@@ -46,6 +47,17 @@ builder.Services.ConfigureApplicationCookie(options =>
 });
 
 builder.Services.AddControllersWithViews();
+  
+  builder.Services.AddScoped<IValidationService,ValidationService>();
+
+
+ builder.Services.AddScoped<IRoutingService, RoutingService>();
+
+ builder.Services.AddScoped<IRoutingService, RoutingService>();
+ 
+  builder.Services.AddSingleton<TimeProvider>(TimeProvider.System);
+
+
 
 var app = builder.Build();
 
