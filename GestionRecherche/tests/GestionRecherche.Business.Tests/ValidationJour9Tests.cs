@@ -508,5 +508,7 @@ public sealed class ValidationJour9Tests
         Assert.False(resultat.EstReussi);
         Assert.Equal(CodesValidation.NiveauIncorrect, resultat.Code);
     }
-    
+
+
+
 }
