@@ -5,6 +5,9 @@
   <Folder Name="/Data/">
     <Project Path="Data/GestionRecherche.Data.csproj" />
   </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/GestionRecherche.Business.Tests/GestionRecherche.Business.Tests.csproj" />
+  </Folder>
   <Folder Name="/Web/">
     <Project Path="Web/GestionRecherche.Web.csproj" />
   </Folder>

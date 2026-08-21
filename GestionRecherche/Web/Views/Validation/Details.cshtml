@@ -1,0 +1,194 @@
+@model ValidationDetailsViewModel
+
+@{
+    ViewData["Title"] = "Examiner la demande";
+}
+
+<a asp-action="Index"
+   class="btn btn-outline-secondary mb-3">
+    Retour
+</a>
+
+<div asp-validation-summary="All"
+     class="alert alert-danger">
+</div>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <h1 class="h3">@Model.Titre</h1>
+
+        <dl class="row mt-4">
+            <dt class="col-sm-3">Auteur</dt>
+            <dd class="col-sm-9">
+                @Model.AuteurNomComplet
+            </dd>
+
+            <dt class="col-sm-3">@Model.StructureLibelle</dt>
+           <dd class="col-sm-9">
+    @Model.StructureNom
+</dd>
+
+            <dt class="col-sm-3">Dépôt</dt>
+            <dd class="col-sm-9">
+                @Model.DateCreationUtc
+                    .ToString("dd/MM/yyyy HH:mm")
+                UTC
+            </dd>
+        </dl>
+
+        <h2 class="h5">Résumé</h2>
+
+        <p style="white-space: pre-line">
+            @Model.Abstract
+        </p>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <h2 class="h5">Journaux ciblés</h2>
+
+        @foreach (var journal in Model.Journaux)
+        {
+            <div class="border-bottom py-3">
+                <strong>
+                    @journal.OrdrePreference.
+                    @journal.Nom
+                </strong>
+
+                <div>
+                    Éditeur :
+                    @(journal.Editeur ?? "Non renseigné")
+                </div>
+
+                <div>
+                    ISSN :
+                    @(journal.Issn ?? "Non renseigné")
+                </div>
+
+                @if (journal.EstNouveauJournal)
+                {
+                    <span class="badge text-bg-warning">
+                        Nouveau journal proposé
+                    </span>
+                }
+            </div>
+        }
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <h2 class="h5">Historique des décisions</h2>
+
+        @if (Model.Historique.Count == 0)
+        {
+            <p class="text-muted mb-0">
+                Aucune décision n’a encore été prise
+                pour cette demande.
+            </p>
+        }
+        else
+        {
+            <table class="table table-sm align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>Date (UTC)</th>
+                        <th>Cycle</th>
+                        <th>Niveau</th>
+                        <th>Décision</th>
+                        <th>Par</th>
+                        <th>Commentaire</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var etape in Model.Historique)
+                    {
+                        <tr>
+                            <td>
+                                @etape.DateDecisionUtc
+                                    .ToString("dd/MM/yyyy HH:mm")
+                            </td>
+                            <td>@etape.NumeroCycleValidation</td>
+                            <td>@etape.NiveauLibelle</td>
+                            <td>
+                                @if (etape.EstRejet)
+                                {
+                                    <span class="badge text-bg-danger">
+                                        @etape.DecisionLibelle
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge text-bg-success">
+                                        @etape.DecisionLibelle
+                                    </span>
+                                }
+                            </td>
+                            <td>@etape.ValidateurNomComplet</td>
+                            <td>@(etape.Commentaire ?? "—")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <form asp-action="Valider"
+              method="post"
+              asp-antiforgery="true">
+
+            <input type="hidden"
+                   name="DemandeId"
+                   value="@Model.Id" />
+
+            <div class="mb-3">
+                <label for="commentaireValidation">
+                    Commentaire facultatif
+                </label>
+
+                <textarea id="commentaireValidation"
+                          name="Commentaire"
+                          class="form-control"
+                          maxlength="1000"></textarea>
+            </div>
+
+            <button type="submit"
+        class="btn btn-success">
+    @Model.LibelleBoutonValidation
+</button>
+        </form>
+    </div>
+
+    <div class="col-md-6">
+        <form asp-action="Rejeter"
+              method="post"
+              asp-antiforgery="true">
+
+            <input type="hidden"
+                   name="DemandeId"
+                   value="@Model.Id" />
+
+            <div class="mb-3">
+                <label for="commentaireRejet">
+                    Motif du rejet
+                </label>
+
+                <textarea id="commentaireRejet"
+                          name="Commentaire"
+                          class="form-control"
+                          minlength="3"
+                          maxlength="1000"
+                          required></textarea>
+            </div>
+
+            <button type="submit"
+                    class="btn btn-danger">
+                Rejeter la demande
+            </button>
+        </form>
+    </div>
+</div>

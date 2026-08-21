@@ -1,0 +1,81 @@
+@model ValidationIndexViewModel
+
+@{
+    ViewData["Title"] = "Demandes à valider";
+}
+
+<h1>Demandes en attente — @Model.NiveauLibelle</h1>
+
+@if (TempData["Succes"] is string succes)
+{
+    <div class="alert alert-success">
+        @succes
+    </div>
+}
+
+@if (TempData["Erreur"] is string erreur)
+{
+    <div class="alert alert-danger">
+        @erreur
+    </div>
+}
+
+@if (Model.Demandes.Count == 0)
+{
+    <div class="alert alert-info">
+        Aucune demande n’attend votre validation.
+    </div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-striped align-middle">
+            <thead>
+                <tr>
+                    <th>Article</th>
+                    <th>Auteur</th>
+                    <th>Laboratoire</th>
+                    <th>Date</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @foreach (var demande in Model.Demandes)
+                {
+                    <tr>
+                        <td>
+                            <strong>@demande.Titre</strong>
+                            <br />
+                            <small>
+                                Cycle
+                                @demande.NumeroCycleValidation
+                            </small>
+                        </td>
+
+                        <td>
+                            @demande.AuteurNomComplet
+                        </td>
+<td>
+    @demande.StructureNom
+</td>
+
+                        <td>
+                            @demande.DateCreationUtc
+                                .ToString("dd/MM/yyyy HH:mm")
+                            UTC
+                        </td>
+
+                        <td>
+                            <a asp-action="Details"
+                               asp-route-id="@demande.Id"
+                               class="btn btn-primary">
+                                Examiner
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

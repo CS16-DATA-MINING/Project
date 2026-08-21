@@ -1,3 +1,4 @@
+using GestionRecherche.Business;
 using GestionRecherche.Data;
 using GestionRecherche.Web;
 using Microsoft.AspNetCore.Identity;
@@ -46,14 +47,27 @@ builder.Services.ConfigureApplicationCookie(options =>
 });
 
 builder.Services.AddControllersWithViews();
+  
+  builder.Services.AddScoped<IValidationService,ValidationService>();
+
+
+ builder.Services.AddScoped<IRoutingService, RoutingService>();
+
+ 
+  builder.Services.AddSingleton<TimeProvider>(TimeProvider.System);
+
+
 
 var app = builder.Build();
 
 if (!app.Environment.IsDevelopment())
 {
+
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
 }
+
+
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
@@ -72,5 +86,13 @@ await IdentitySeeder.SeedAsync(
     app.Services,
     app.Configuration,
     seedDevelopmentUser: app.Environment.IsDevelopment());
+
+//LE Test de jour 5 ( crer deux demeande a et)
+//if (app.Environment.IsDevelopment())
+//{
+  //  await GestionRecherche.Web
+     //   .Jour5TestDataSeeder
+       // .SeedAsync(app.Services);
+//}
 
 app.Run();
