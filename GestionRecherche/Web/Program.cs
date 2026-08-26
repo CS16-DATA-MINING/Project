@@ -1,7 +1,11 @@
 using GestionRecherche.Business;
 using GestionRecherche.Data;
 using GestionRecherche.Web;
+using GestionRecherche.Web.BackgroundServices;
+using GestionRecherche.Web.Security;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -46,15 +50,83 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.SlidingExpiration = true;
 });
 
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews(options =>
+{
+    options.Filters.Add(
+        new AutoValidateAntiforgeryTokenAttribute());
+});
   
+builder.Services.AddScoped<
+    IAuthorizationHandler,
+    UtilisateurActifHandler>();
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy(
+        PolitiquesAutorisation.ValidationInterne,
+        policy =>
+        {
+            policy.RequireAuthenticatedUser();
+
+            policy.RequireRole(
+                RolesMetier.ChefLabo,
+                RolesMetier.ChefUer,
+                RolesMetier.ChefBureau,
+                RolesMetier.SecretariatConseil);
+
+            policy.AddRequirements(
+                new UtilisateurActifRequirement());
+        });
+
+    options.AddPolicy(
+        PolitiquesAutorisation.ChefBureauActif,
+        policy =>
+        {
+            policy.RequireAuthenticatedUser();
+            policy.RequireRole(RolesMetier.ChefBureau);
+
+            policy.AddRequirements(
+                new UtilisateurActifRequirement());
+        });
+
+    options.AddPolicy(
+        PolitiquesAutorisation.Administration,
+        policy =>
+        {
+            policy.RequireAuthenticatedUser();
+            policy.RequireRole(RolesMetier.Admin);
+
+            policy.AddRequirements(
+                new UtilisateurActifRequirement());
+        });
+});
+
+
+
+
+
   builder.Services.AddScoped<IValidationService,ValidationService>();
 
 
  builder.Services.AddScoped<IRoutingService, RoutingService>();
 
+
+
+ builder.Services.AddScoped<IDashboardService, DashboardService>();
  
+ builder.Services.AddScoped<IAnomalieService, AnomalieService>();
+
   builder.Services.AddSingleton<TimeProvider>(TimeProvider.System);
+
+
+
+builder.Services.AddScoped<IAlerteService, AlerteService>();
+
+builder.Services
+    .AddOptions<AlerteOptions>()
+    .Bind(builder.Configuration.GetSection(AlerteOptions.SectionName));
+
+builder.Services.AddHostedService<AlerteBackgroundService>();
 
 
 
@@ -88,11 +160,11 @@ await IdentitySeeder.SeedAsync(
     seedDevelopmentUser: app.Environment.IsDevelopment());
 
 //LE Test de jour 5 ( crer deux demeande a et)
-//if (app.Environment.IsDevelopment())
-//{
-  //  await GestionRecherche.Web
-     //   .Jour5TestDataSeeder
-       // .SeedAsync(app.Services);
-//}
+if (app.Environment.IsDevelopment())
+{
+   await GestionRecherche.Web
+       .Jour5TestDataSeeder
+     .SeedAsync(app.Services);
+}
 
 app.Run();

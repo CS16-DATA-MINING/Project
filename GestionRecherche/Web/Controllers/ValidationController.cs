@@ -2,12 +2,14 @@ using System;
 using System.Security.Claims;
 using GestionRecherche.Business;
 using GestionRecherche.Data;
+using GestionRecherche.Web.Security;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GestionRecherche.Web;
 
-[Authorize(Roles = "ChefLabo,ChefUER,ChefBureau,SecretariatConseil")]
+[Authorize(
+    Policy = PolitiquesAutorisation.ValidationInterne)]
 public sealed class ValidationController : Controller
 {
     private readonly IValidationService _validationService;
@@ -364,15 +366,12 @@ public sealed class ValidationController : Controller
         NiveauValidation niveau,
         CancellationToken cancellationToken)
     {
-        if (resultat.Code == CodesValidation.AccesInterdit)
+        if (resultat.Code is CodesValidation.AccesInterdit or CodesValidation.DemandeIntrouvable)
         {
-            return Forbid();
+         return NotFound();
         }
 
-        if (resultat.Code == CodesValidation.DemandeIntrouvable)
-        {
-            return NotFound();
-        }
+      
 
         if (resultat.Code is
             CodesValidation.CommentaireRejetObligatoire

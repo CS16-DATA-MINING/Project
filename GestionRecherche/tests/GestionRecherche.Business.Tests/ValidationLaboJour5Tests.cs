@@ -2,6 +2,11 @@ using GestionRecherche.Business;
 using GestionRecherche.Data;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
+using GestionRecherche.Business;
+using GestionRecherche.Data;
+using Microsoft.EntityFrameworkCore;
+using Xunit;
+using Microsoft.AspNetCore.Identity;
 
 namespace GestionRecherche.Business.Tests;
 
@@ -165,6 +170,26 @@ private sealed record JeuJour5(
         chefB,
         auteurA,
         auteurB);
+        var roleChefLabo = new IdentityRole
+{
+    Id = "role-chef-labo",
+    Name = "ChefLabo",
+    NormalizedName = "CHEFLABO"
+};
+
+dbContext.Roles.Add(roleChefLabo);
+
+dbContext.UserRoles.AddRange(
+    new IdentityUserRole<string>
+    {
+        UserId = chefAId,
+        RoleId = roleChefLabo.Id
+    },
+    new IdentityUserRole<string>
+    {
+        UserId = chefBId,
+        RoleId = roleChefLabo.Id
+    });
 
     dbContext.Uers.Add(uer);
 

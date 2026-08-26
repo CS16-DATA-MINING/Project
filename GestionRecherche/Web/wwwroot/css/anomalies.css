@@ -1,0 +1,23 @@
+.anomaly-details-list dt {
+  color: #6c757d;
+  font-weight: 600;
+}
+
+.anomaly-message {
+  line-height: 1.65;
+  overflow-wrap: anywhere;
+  white-space: pre-line;
+}
+
+.anomaly-list-message {
+  color: #6c757d;
+  line-height: 1.4;
+  max-width: 32rem;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 767.98px) {
+  .anomaly-details-list dt {
+    margin-top: 0.75rem;
+  }
+}

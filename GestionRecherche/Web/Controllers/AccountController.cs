@@ -46,9 +46,10 @@ public class AccountController : Controller
         }
 
         var email = model.Email.Trim();
+
         var user = await _userManager.FindByEmailAsync(email);
 
-        if (user is null)
+        if (user is null || !user.EstActif)
         {
             ModelState.AddModelError(
                 string.Empty,

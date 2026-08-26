@@ -1,0 +1,158 @@
+﻿@model AnomalieDetailsViewModel
+
+@{
+    ViewData["Title"] = Model.EstOuverte
+        ? "Traiter une anomalie"
+        : "Détail du traitement";
+}
+
+<div class="d-flex flex-column flex-md-row
+            align-items-md-center justify-content-between
+            gap-3 mb-4">
+
+    <div>
+        <a asp-action="@(Model.EstOuverte
+               ? "Index"
+               : "Historique")"
+           class="text-decoration-none">
+            ← Retour à la liste
+        </a>
+
+        <h1 class="mt-2 mb-1">
+            @ViewData["Title"]
+        </h1>
+
+        <p class="text-muted mb-0">
+            Anomalie #@Model.Id ·
+            Demande #@Model.DemandePublicationId
+        </p>
+    </div>
+
+    <span class="badge @Model.TypeBadgeCss fs-6
+                 align-self-start">
+        @Model.TypeLibelle
+    </span>
+</div>
+
+@if (!ViewData.ModelState.IsValid)
+{
+    <div asp-validation-summary="All"
+         class="alert alert-danger">
+    </div>
+}
+
+<div class="row g-4">
+    <div class="col-12 col-lg-7">
+        <div class="card h-100">
+            <div class="card-header fw-semibold">
+                Informations de l'anomalie
+            </div>
+
+            <div class="card-body">
+                <dl class="row mb-0 anomaly-details-list">
+                    <dt class="col-sm-4">Article</dt>
+                    <dd class="col-sm-8">
+                        @Model.TitreDemande
+                    </dd>
+
+                    <dt class="col-sm-4">Auteur</dt>
+                    <dd class="col-sm-8">
+                        @Model.AuteurNomComplet
+                    </dd>
+
+                    <dt class="col-sm-4">Laboratoire</dt>
+                    <dd class="col-sm-8">
+                        @Model.LaboratoireNom
+                    </dd>
+
+                    <dt class="col-sm-4">Statut éditeur</dt>
+                    <dd class="col-sm-8">
+                        @Model.StatutEditeurLibelle
+                    </dd>
+
+                    <dt class="col-sm-4">Détectée le</dt>
+                    <dd class="col-sm-8">
+                        @(Model.DateDetectionUtc.ToString("dd/MM/yyyy HH:mm:ss")) UTC
+                    </dd>
+
+                    <dt class="col-sm-4">
+                        Durée constatée
+                    </dt>
+                    <dd class="col-sm-8">
+                        @Model.DureeJours jour(s)
+                    </dd>
+                </dl>
+
+                <hr />
+
+                <h2 class="h6">
+                    Message généré par le robot
+                </h2>
+
+                <p class="mb-0 anomaly-message">
+                    @Model.Message
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-lg-5">
+        @if (Model.EstOuverte)
+        {
+            <div class="card border-primary">
+                <div class="card-header fw-semibold
+                            text-primary">
+                    Clôturer l'anomalie
+                </div>
+
+                <div class="card-body">
+                    <p class="text-muted">
+                        Décrivez l'action réalisée :
+                        contact de l'auteur, justificatif
+                        reçu, relance effectuée, etc.
+                    </p>
+
+                    <partial
+                        name="_FormulaireTraitement"
+                        model="Model.Traitement" />
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="card border-success">
+                <div class="card-header fw-semibold
+                            text-success">
+                    Traitement enregistré
+                </div>
+
+                <div class="card-body">
+                    <dl class="mb-0">
+                        <dt>Traitée le</dt>
+                        <dd>
+                            @(Model.DateTraitementUtc
+                                ?.ToString(
+                                    "dd/MM/yyyy HH:mm:ss"))
+                            UTC
+                        </dd>
+
+                        <dt>Traitée par</dt>
+                        <dd>
+                            @(Model.TraiteeParNomComplet ?? "Utilisateur inconnu")
+                        </dd>
+
+                        <dt>Commentaire</dt>
+                        <dd class="anomaly-message">
+                            @Model.CommentaireTraitement
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts
+{
+    <partial name="_ValidationScriptsPartial" />
+}

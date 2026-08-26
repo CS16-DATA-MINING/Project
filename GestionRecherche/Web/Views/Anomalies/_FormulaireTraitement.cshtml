@@ -1,0 +1,33 @@
+﻿@model TraitementAnomalieViewModel
+
+<form asp-controller="Anomalies"
+      asp-action="Traiter"
+      method="post">
+
+    @Html.AntiForgeryToken()
+
+    <input asp-for="AnomalieId" type="hidden" />
+
+    <div class="mb-3">
+        <label asp-for="Commentaire"
+               class="form-label"></label>
+
+        <textarea asp-for="Commentaire"
+                  class="form-control"
+                  rows="6"
+                  maxlength="1000"
+                  placeholder="Exemple : auteur contacté ; mise à jour demandée."></textarea>
+
+        <span asp-validation-for="Commentaire"
+              class="text-danger"></span>
+
+        <div class="form-text">
+            Ce commentaire restera dans l'historique.
+        </div>
+    </div>
+
+    <button type="submit"
+            class="btn btn-primary w-100">
+        Marquer comme traitée
+    </button>
+</form>

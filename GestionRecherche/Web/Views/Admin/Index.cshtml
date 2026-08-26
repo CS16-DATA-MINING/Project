@@ -1,0 +1,168 @@
+﻿@using GestionRecherche.Business
+@model RobotAlertesViewModel
+
+@{
+    ViewData["Title"] = "Robot d'alertes";
+}
+
+<h1>Robot d'alertes</h1>
+
+<p class="text-muted">
+    Cette page permet de lancer immédiatement
+    une vérification des demandes de publication.
+</p>
+
+@if (TempData["Succes"] is string succes)
+{
+    <div class="alert alert-success">
+        @succes
+    </div>
+}
+
+@if (TempData["Erreur"] is string erreur)
+{
+    <div class="alert alert-danger">
+        @erreur
+    </div>
+}
+
+<div class="card mb-4">
+    <div class="card-body">
+        <h2 class="h5">
+            Passage manuel
+        </h2>
+
+        <p>
+            Cliquez sur ce bouton pour lancer le robot
+            sans attendre le prochain passage automatique.
+        </p>
+
+        <form asp-controller="Admin"
+              asp-action="LancerMaintenant"
+              method="post">
+
+            @Html.AntiForgeryToken()
+
+            <button type="submit"
+                    class="btn btn-primary">
+                Lancer maintenant
+            </button>
+        </form>
+    </div>
+</div>
+
+@if (Model.DernierPassage is null)
+{
+    <div class="alert alert-info">
+        Aucun passage manuel n'a encore été exécuté.
+    </div>
+}
+else
+{
+    ResultatPassageAlerte passage =
+        Model.DernierPassage;
+
+    <div class="card">
+        <div class="card-header">
+            Résultat du dernier passage
+        </div>
+
+        <div class="card-body">
+            <table class="table table-bordered">
+                <tbody>
+                    <tr>
+                        <th>Résultat</th>
+                        <td>
+                            @if (passage.EstReussi)
+                            {
+                                <span class="badge bg-success">
+                                    Réussi
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-danger">
+                                    Échec
+                                </span>
+                            }
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <th>Code</th>
+                        <td>@passage.Code</td>
+                    </tr>
+
+                    <tr>
+                        <th>Message</th>
+                        <td>@passage.Message</td>
+                    </tr>
+
+                    <tr>
+                        <th>Début</th>
+                        <td>
+                            @passage.DateDebutUtc.ToString(
+                                "dd/MM/yyyy HH:mm:ss")
+                            UTC
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <th>Fin</th>
+                        <td>
+                            @passage.DateFinUtc.ToString(
+                                "dd/MM/yyyy HH:mm:ss")
+                            UTC
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <th>Délai D1</th>
+                        <td>
+                            @if (passage.DelaiD1Jours.HasValue)
+                            {
+                                <span>
+                                    @passage.DelaiD1Jours.Value jour(s)
+                                </span>
+                            }
+                            else
+                            {
+                                <span>Non disponible</span>
+                            }
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <th>Délai D2</th>
+                        <td>
+                            @if (passage.DelaiD2Mois.HasValue)
+                            {
+                                <span>
+                                    @passage.DelaiD2Mois.Value mois
+                                </span>
+                            }
+                            else
+                            {
+                                <span>Non disponible</span>
+                            }
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <th>Demandes examinées</th>
+                        <td>
+                            @passage.DemandesExaminees
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <th>Anomalies créées</th>
+                        <td>
+                            @passage.AnomaliesCreees
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+}

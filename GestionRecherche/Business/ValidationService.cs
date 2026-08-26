@@ -7,8 +7,19 @@ namespace GestionRecherche.Business;
 public class ValidationService : IValidationService
 {
      private const int LongueurMaxCommentaire = 1000;
-     private const string RoleChefBureauNormalise = "CHEFBUREAU";
-private const string RoleSecretariatConseilNormalise = "SECRETARIATCONSEIL";
+     
+     private const string RoleChefLaboNormalise =
+    "CHEFLABO";
+
+private const string RoleChefUerNormalise =
+    "CHEFUER";
+
+private const string RoleChefBureauNormalise =
+    "CHEFBUREAU";
+
+private const string RoleSecretariatConseilNormalise =
+    "SECRETARIATCONSEIL";
+
      private readonly AppDbContext _dbContext;
     private readonly TimeProvider _timeProvider;
 
@@ -387,7 +398,13 @@ private static StatutValidationInterne ObtenirStatutAttendu(
 
 
 
-public async Task<IReadOnlyList<DemandeValidationListeDto>>
+
+
+
+
+
+public async Task<
+    IReadOnlyList<DemandeValidationListeDto>>
     ListerDemandesEnAttenteAsync(
         string validateurId,
         NiveauValidation niveau,
@@ -395,7 +412,22 @@ public async Task<IReadOnlyList<DemandeValidationListeDto>>
 {
     if (string.IsNullOrWhiteSpace(validateurId))
     {
-        return Array.Empty<DemandeValidationListeDto>();
+        return Array.Empty<
+            DemandeValidationListeDto>();
+    }
+
+    string idNormalise = validateurId.Trim();
+
+    bool autorise =
+        await EstValidateurActifPourNiveauAsync(
+            idNormalise,
+            niveau,
+            cancellationToken);
+
+    if (!autorise)
+    {
+        return Array.Empty<
+            DemandeValidationListeDto>();
     }
 
     return await ConstruireRequetePourNiveau(
@@ -488,6 +520,19 @@ private async Task MettreNouveauxJournauxEnAttenteModerationAsync(
          * dans la file de ce validateur, le résultat est null -> le
          * contrôleur renvoie 404 sans révéler que la demande existe.
          */
+
+
+         bool autorise =
+    await EstValidateurActifPourNiveauAsync(
+        idNormalise,
+        niveau,
+        cancellationToken);
+
+if (!autorise)
+{
+    return null;
+}
+
         return await ConstruireRequetePourNiveau(idNormalise, niveau)
             .Where(demande => demande.Id == demandeId)
             .Select(demande => new DemandeValidationDetailsDto
@@ -549,6 +594,74 @@ private async Task MettreNouveauxJournauxEnAttenteModerationAsync(
      * Contrôle d'accès AVANT décision (défense en profondeur).
      * Retourne null si l'accès est autorisé, sinon l'erreur métier.
      */
+private async Task<bool>
+    EstValidateurActifPourNiveauAsync(
+        string validateurId,
+        NiveauValidation niveau,
+        CancellationToken cancellationToken)
+{
+    string? roleNormalise = niveau switch
+    {
+        NiveauValidation.Labo =>
+            RoleChefLaboNormalise,
+
+        NiveauValidation.Uer =>
+            RoleChefUerNormalise,
+
+        NiveauValidation.Bureau =>
+            RoleChefBureauNormalise,
+
+        NiveauValidation.Conseil =>
+            RoleSecretariatConseilNormalise,
+
+        _ => null
+    };
+
+    if (roleNormalise is null)
+    {
+        return false;
+    }
+
+    bool possedeRoleEtEstActif =
+        await EstDansRoleActifAsync(
+            validateurId,
+            roleNormalise,
+            cancellationToken);
+
+    if (!possedeRoleEtEstActif)
+    {
+        return false;
+    }
+
+    return niveau switch
+    {
+        NiveauValidation.Labo =>
+            await _dbContext.Laboratoires
+                .AsNoTracking()
+                .AnyAsync(
+                    laboratoire =>
+                        laboratoire.EstActif &&
+                        laboratoire.ChefLaboId ==
+                            validateurId,
+                    cancellationToken),
+
+        NiveauValidation.Uer =>
+            await _dbContext.Uers
+                .AsNoTracking()
+                .AnyAsync(
+                    uer =>
+                        uer.EstActive &&
+                        uer.ChefUerId ==
+                            validateurId,
+                    cancellationToken),
+
+        NiveauValidation.Bureau => true,
+        NiveauValidation.Conseil => true,
+
+        _ => false
+    };
+}
+
 
     private async Task<ResultatValidation?> VerifierAccesAsync(
         int demandeId,
@@ -564,6 +677,21 @@ private async Task MettreNouveauxJournauxEnAttenteModerationAsync(
         }
 
         string idNormalise = validateurId.Trim();
+
+
+bool validateurAutorise =
+    await EstValidateurActifPourNiveauAsync(
+        idNormalise,
+        niveau,
+        cancellationToken);
+
+if (!validateurAutorise)
+{
+    return ResultatValidation.Echec(
+        CodesValidation.AccesInterdit,
+        "Vous ne pouvez pas traiter cette demande.");
+}
+
 
         var contexte =
             await _dbContext.DemandesPublication

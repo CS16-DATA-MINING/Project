@@ -1,0 +1,250 @@
+﻿@using GestionRecherche.Data
+@model AnomaliesIndexViewModel
+
+@{
+    string actionListe = Model.AfficherHistorique
+        ? "Historique"
+        : "Index";
+
+    ViewData["Title"] = Model.AfficherHistorique
+        ? "Historique des anomalies"
+        : "Anomalies ouvertes";
+}
+
+<div class="d-flex flex-column flex-lg-row
+            align-items-lg-center justify-content-between
+            gap-3 mb-4">
+    <div>
+        <h1 class="mb-1">@ViewData["Title"]</h1>
+
+        <p class="text-muted mb-0">
+            @if (Model.AfficherHistorique)
+            {
+                <span>
+                    Consultez les anomalies clôturées
+                    et leur trace de traitement.
+                </span>
+            }
+            else
+            {
+                <span>
+                    Consultez et traitez les alertes D1
+                    et D2 encore ouvertes.
+                </span>
+            }
+        </p>
+    </div>
+
+    <div class="btn-group"
+         role="group"
+         aria-label="Choix de la liste">
+        <a asp-action="Index"
+           class="btn @(Model.AfficherHistorique
+               ? "btn-outline-primary"
+               : "btn-primary")">
+            Anomalies ouvertes
+        </a>
+
+        <a asp-action="Historique"
+           class="btn @(Model.AfficherHistorique
+               ? "btn-primary"
+               : "btn-outline-primary")">
+            Historique
+        </a>
+    </div>
+</div>
+
+@if (TempData["Succes"] is string succes)
+{
+    <div class="alert alert-success">
+        @succes
+    </div>
+}
+
+@if (TempData["Information"] is string information)
+{
+    <div class="alert alert-info">
+        @information
+    </div>
+}
+
+<div class="card mb-4">
+    <div class="card-body">
+        <form asp-action="@actionListe"
+              method="get"
+              class="row g-3 align-items-end">
+
+            <div class="col-12 col-md-4">
+                <label asp-for="Type" class="form-label">
+                    Type d'anomalie
+                </label>
+
+                <select asp-for="Type" class="form-select">
+                    <option value="">Tous les types</option>
+
+                    <option value="@TypeAnomalie.NonSoumission">
+                        Non-soumission (D1)
+                    </option>
+
+                    <option value="@TypeAnomalie.Stagnation">
+                        Stagnation (D2)
+                    </option>
+                </select>
+            </div>
+
+            <div class="col-12 col-md-5">
+                <label asp-for="LaboratoireId"
+                       class="form-label">
+                    Laboratoire
+                </label>
+
+                <select asp-for="LaboratoireId"
+                        class="form-select">
+                    <option value="">
+                        Tous les laboratoires
+                    </option>
+
+                    @foreach (
+                        LaboratoireFiltreViewModel laboratoire
+                        in Model.Laboratoires)
+                    {
+                        <option value="@laboratoire.Id">
+                            @laboratoire.Nom
+                        </option>
+                    }
+                </select>
+            </div>
+
+            <div class="col-12 col-md-3 d-flex gap-2">
+                <button type="submit"
+                        class="btn btn-primary flex-grow-1">
+                    Filtrer
+                </button>
+
+                <a asp-action="@actionListe"
+                   class="btn btn-outline-secondary">
+                    Réinitialiser
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@if (Model.Anomalies.Count == 0)
+{
+    <div class="alert alert-light border">
+        @(Model.AfficherHistorique
+            ? "Aucune anomalie traitée ne correspond aux filtres."
+            : "Aucune anomalie ouverte ne correspond aux filtres.")
+    </div>
+}
+else
+{
+    <p class="text-muted">
+        @Model.Anomalies.Count résultat(s)
+    </p>
+
+    <div class="table-responsive border rounded">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Type</th>
+                    <th>Demande</th>
+                    <th>Auteur</th>
+                    <th>Laboratoire</th>
+                    <th>Détection</th>
+                    <th>Durée</th>
+
+                    @if (Model.AfficherHistorique)
+                    {
+                        <th>Traitement</th>
+                    }
+
+                    <th class="text-end">Action</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @foreach (
+                    AnomalieListeItemViewModel anomalie
+                    in Model.Anomalies)
+                {
+                   <tr>
+    <td>
+        <span class="badge @anomalie.TypeBadgeCss">
+            @anomalie.TypeLibelle
+        </span>
+    </td>
+
+    <td>
+        <div class="fw-semibold">
+            @anomalie.TitreDemande
+        </div>
+
+        <div class="small text-muted">
+            Demande #@anomalie.DemandePublicationId ·
+            @anomalie.StatutEditeurLibelle
+        </div>
+
+        <div class="small mt-1 anomaly-list-message">
+            @anomalie.Message
+        </div>
+    </td>
+
+    <td>
+        @anomalie.AuteurNomComplet
+    </td>
+
+    <td>
+        @anomalie.LaboratoireNom
+    </td>
+
+    <td class="text-nowrap">
+        @(anomalie.DateDetectionUtc.ToString("dd/MM/yyyy HH:mm")) UTC
+    </td>
+
+    <td class="text-nowrap">
+        @anomalie.DureeJours jour(s)
+    </td>
+
+    @if (Model.AfficherHistorique)
+    {
+        <td>
+            @if (anomalie.DateTraitementUtc.HasValue)
+            {
+                <div class="text-nowrap">
+                    @(anomalie.DateTraitementUtc.Value.ToString("dd/MM/yyyy HH:mm")) UTC
+                </div>
+
+                <div class="small text-muted">
+                    @(anomalie.TraiteeParNomComplet ?? "Utilisateur inconnu")
+                </div>
+            }
+            else
+            {
+                <span class="text-muted">
+                    Non renseigné
+                </span>
+            }
+        </td>
+    }
+
+    <td class="text-end">
+        <a asp-controller="Anomalies"
+           asp-action="Details"
+           asp-route-id="@anomalie.Id"
+           class="btn btn-sm @(Model.AfficherHistorique
+               ? "btn-outline-secondary"
+               : "btn-outline-primary")">
+
+            @(Model.AfficherHistorique
+                ? "Consulter"
+                : "Traiter")
+        </a>
+    </td>
+</tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

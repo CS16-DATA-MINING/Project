@@ -136,7 +136,20 @@ public sealed class ValidationJour9Tests
             CreerUtilisateur("chef-bureau", "Yacine", "Belkacem"),
             CreerUtilisateur("secretaire", "Nour", "Haddad"),
             CreerUtilisateur("auteur-a", "Amine", "Saidi", 1, 1));
+DonnerRole(
+    dbContext,
+    "chef-a",
+    "ChefLabo");
 
+DonnerRole(
+    dbContext,
+    "chef-b",
+    "ChefLabo");
+
+DonnerRole(
+    dbContext,
+    "chef-uer",
+    "ChefUER");
         DonnerRole(dbContext, "chef-bureau", "ChefBureau");
         DonnerRole(dbContext, "secretaire", "SecretariatConseil");
 
@@ -509,6 +522,145 @@ public sealed class ValidationJour9Tests
         Assert.Equal(CodesValidation.NiveauIncorrect, resultat.Code);
     }
 
+[Fact]
+public async Task
+    ValiderAuNiveauAsync_ChefAutreLabo_AccesInterdit()
+{
+    await using AppDbContext dbContext =
+        CreerContexte();
 
+    DemandePublication demande =
+        await CreerMondeAvecDemandeAsync(
+            dbContext,
+            StatutValidationInterne.EnAttenteLabo);
+
+    var horloge = new HorlogeReglable(
+        new DateTimeOffset(
+            2026, 8, 26,
+            10, 0, 0,
+            TimeSpan.Zero));
+
+    var service =
+        new ValidationService(
+            dbContext,
+            horloge);
+
+    ResultatValidation resultat =
+        await service.ValiderAuNiveauAsync(
+            demande.Id,
+            "chef-b",
+            NiveauValidation.Labo,
+            "Tentative sur le mauvais laboratoire");
+
+    Assert.False(resultat.EstReussi);
+
+    Assert.Equal(
+        CodesValidation.AccesInterdit,
+        resultat.Code);
+
+    Assert.Equal(
+        StatutValidationInterne.EnAttenteLabo,
+        demande.StatutValidationInterne);
+
+    Assert.Empty(dbContext.EtapesValidation);
+}
+
+[Fact]
+public async Task
+    ValiderAuNiveauAsync_ChefDesactive_AccesInterdit()
+{
+    await using AppDbContext dbContext =
+        CreerContexte();
+
+    DemandePublication demande =
+        await CreerMondeAvecDemandeAsync(
+            dbContext,
+            StatutValidationInterne.EnAttenteLabo);
+
+    ApplicationUser chef =
+        await dbContext.Users.SingleAsync(
+            utilisateur =>
+                utilisateur.Id == "chef-a");
+
+    chef.EstActif = false;
+
+    await dbContext.SaveChangesAsync();
+
+    var horloge = new HorlogeReglable(
+        new DateTimeOffset(
+            2026, 8, 26,
+            10, 0, 0,
+            TimeSpan.Zero));
+
+    var service =
+        new ValidationService(
+            dbContext,
+            horloge);
+
+    ResultatValidation resultat =
+        await service.ValiderAuNiveauAsync(
+            demande.Id,
+            "chef-a",
+            NiveauValidation.Labo,
+            "Tentative avec un compte désactivé");
+
+    Assert.False(resultat.EstReussi);
+
+    Assert.Equal(
+        CodesValidation.AccesInterdit,
+        resultat.Code);
+
+    Assert.Equal(
+        StatutValidationInterne.EnAttenteLabo,
+        demande.StatutValidationInterne);
+
+    Assert.Empty(dbContext.EtapesValidation);
+}
+[Fact]
+public async Task
+    ValiderAuNiveauAsync_ChefSansRole_AccesInterdit()
+{
+    await using AppDbContext dbContext =
+        CreerContexte();
+
+    DemandePublication demande =
+        await CreerMondeAvecDemandeAsync(
+            dbContext,
+            StatutValidationInterne.EnAttenteLabo);
+
+    var liensRoles =
+        await dbContext.UserRoles
+            .Where(lien =>
+                lien.UserId == "chef-a")
+            .ToListAsync();
+
+    dbContext.UserRoles.RemoveRange(liensRoles);
+
+    await dbContext.SaveChangesAsync();
+
+    var horloge = new HorlogeReglable(
+        new DateTimeOffset(
+            2026, 8, 26,
+            10, 0, 0,
+            TimeSpan.Zero));
+
+    var service =
+        new ValidationService(
+            dbContext,
+            horloge);
+
+    ResultatValidation resultat =
+        await service.ValiderAuNiveauAsync(
+            demande.Id,
+            "chef-a",
+            NiveauValidation.Labo,
+            "Tentative sans rôle");
+
+    Assert.False(resultat.EstReussi);
+
+    Assert.Equal(
+        CodesValidation.AccesInterdit,
+        resultat.Code);
+}
 
 }

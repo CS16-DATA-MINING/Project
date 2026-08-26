@@ -29,7 +29,7 @@ public enum DecisionValidation
     Rejetee = 2
 }
 
-public enum StatutModeration
+public enum StatutModeration  // journal
 {
     NonRequise = 0,
     Proposee = 1,
