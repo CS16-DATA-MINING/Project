@@ -64,10 +64,7 @@ builder.HasKey(uer => uer.Id);
         builder.HasIndex(uer => uer.Code)
             .IsUnique();
 
-        builder.HasOne(uer => uer.ChefUer)
-            .WithMany()
-            .HasForeignKey(uer => uer.ChefUerId)
-            .OnDelete(DeleteBehavior.Restrict);
+       
 
     builder.HasOne(uer => uer.ChefUer)
     .WithMany()
@@ -213,5 +210,45 @@ public sealed class JournalCibleDemandeConfiguration
 
         builder.HasIndex(cible => cible.IssnNormalise);
     }
+  
+
 }
- 
+
+public sealed class JournalConfiguration
+    : IEntityTypeConfiguration<Journal>
+{
+    public void Configure(
+        EntityTypeBuilder<Journal> builder)
+    {
+        builder.ToTable("Journaux");
+
+        builder.HasKey(journal => journal.Id);
+
+        builder.Property(journal => journal.Nom)
+            .HasMaxLength(250)
+            .IsRequired();
+
+        builder.Property(journal => journal.NomNormalise)
+            .HasMaxLength(250)
+            .IsRequired();
+
+        builder.Property(journal => journal.Editeur)
+            .HasMaxLength(200)
+            .IsRequired();
+
+        builder.Property(journal => journal.Issn)
+            .HasMaxLength(20)
+            .IsRequired();
+
+        builder.Property(journal => journal.IssnNormalise)
+            .HasMaxLength(20)
+            .IsRequired();
+
+        builder.HasIndex(journal => journal.IssnNormalise)
+            .IsUnique();
+
+        builder.HasIndex(journal => journal.NomNormalise);
+    }
+}
+
+

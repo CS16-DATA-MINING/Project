@@ -368,30 +368,40 @@ namespace GestionRecherche.Data.Migrations
 
                     b.Property<string>("Editeur")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<bool>("EstActif")
                         .HasColumnType("bit");
 
                     b.Property<string>("Issn")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<string>("IssnNormalise")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<string>("Nom")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
 
                     b.Property<string>("NomNormalise")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Journaux");
+                    b.HasIndex("IssnNormalise")
+                        .IsUnique();
+
+                    b.HasIndex("NomNormalise");
+
+                    b.ToTable("Journaux", (string)null);
                 });
 
             modelBuilder.Entity("GestionRecherche.Data.JournalCibleDemande", b =>
