@@ -1,0 +1,277 @@
+1. Présentation Générale du Projet
+
+Le projet consiste à concevoir et développer une application web centralisée dédiée au pilotage, au suivi et à la gestion des activités de recherche au sein de l’Institut. Ce système vise à dématérialiser les processus administratifs, à fluidifier la communication entre les différents échelons de validation, et à offrir des outils de pilotage précis à la direction.
+
+Objectifs principaux :
+
+Encadrer et tracer le cycle de vie complet des demandes de publication d'articles scientifiques.
+
+Centraliser et dématérialiser les dossiers de gradation universitaire.
+
+Piloter en temps réel l'état d'avancement et la consommation budgétaire des projets de recherche.
+
+Alerter automatiquement l'administration en cas de stagnation ou de non-respect des délais de soumission.
+
+Intégrer un outil d'aide à la décision basé sur une intelligence artificielle locale pour orienter les chercheurs.
+
+Assurer la qualité et l'unicité du référentiel des journaux scientifiques par une modération administrative.
+
+
+2. Architecture Technique & Outils de Développement
+
+Conformément aux directives, la solution sera développée exclusivement avec la stack technologique suivante :
+
+Framework Global : .NET (Version 8.0 ou supérieure)
+
+Moteur de Rendu UI : ASP.NET Core Razor Pages / MVC
+
+Base de Données : Microsoft SQL Server
+
+Accès aux Données : Entity Framework Core (EF Core)
+
+Composant IA : Modèle Open Source local via ONNX Runtime en C# ou micro-service local FastAPI/Python pour garantir la confidentialité absolue des travaux de recherche avant publication.
+
+
+3. Spécifications Fonctionnelles (Les 3 Volets)
+
+Volet 1 : Suivi des Demandes de Publication d'Articles Scientifiques
+
+Ce volet concerne exclusivement les articles scientifiques. Les communications, chapitres de livres ou brevets sont exclus de ce flux.
+
+A. Initialisation de la Demande & Comportement des Journaux
+
+Règle de limitation :
+
+Lors de la création de la demande, l'auteur peut lister un nombre maximal de journaux visés défini par l'administrateur, par exemple 3 journaux maximum, classés par ordre de préférence.
+
+Cas des Journaux Existants :
+
+L'auteur sélectionne le journal depuis la base de données de l'institut. Les informations du journal s'affichent automatiquement à l'écran et sont strictement non modifiables par l'auteur.
+
+Cas des Journaux Non Préexistants (Nouveaux) :
+
+Si un journal n'existe pas en base, l'auteur coche une option pour "Proposer un nouveau journal" et doit obligatoirement remplir manuellement ses informations : Nom, Éditeur, code ISSN, etc.
+
+Déroulement du Circuit de Validation :
+
+La présence d'un nouveau journal ne bloque pas le dossier. La demande de publication suit son cours normal à travers toute la hiérarchie.
+
+
+B. Processus de Modération et Gestion des Doublons (Post-Conseil)
+
+Étant donné que deux auteurs différents peuvent proposer simultanément le même nouveau journal avec de légères variantes d'écriture ou d'orthographe, l'insertion en base de données n'est jamais automatique.
+
+1. Mise en attente :
+
+Lorsque le Conseil Scientifique valide définitivement une demande contenant un ou plusieurs nouveaux journaux, la demande d'article est validée, mais le statut des journaux proposés passe à "En attente de modération".
+
+2. Interface de dédoublonnage (Chef de Bureau) :
+
+Un écran dédié est mis à la disposition du Chef de Bureau de la Recherche. Cet outil liste toutes les propositions de journaux faites par les auteurs.
+
+3. Action de rapprochement :
+
+Le système affiche au Chef de Bureau les informations saisies par les différents demandeurs.
+
+Exemple : l'auteur A a écrit "IEEE Trans on AI" et l'auteur B a écrit "IEEE Transactions on Artificial Intelligence".
+
+4. Validation finale :
+
+Le Chef de Bureau coche et sélectionne la version exacte et correcte à insérer.
+
+Une fois validé par ses soins, le journal est officiellement créé dans la table globale des journaux et toutes les demandes d'articles concernées sont automatiquement liées à cette unique ligne propre, éliminant ainsi définitivement tout risque de doublon.
+
+
+C. Module IA d'Aide à la Sélection du Journal
+
+Pour aider l'auteur lors de la saisie, l'interface Razor intègre un module d'IA locale.
+
+L'auteur colle le titre et l'abstract de son article.
+
+L'IA calcule la proximité sémantique avec la ligne éditoriale ou l'historique des journaux validés de la base de données et propose automatiquement les journaux les plus appropriés sous forme de suggestions cliquables.
+
+
+D. Workflow de Validation Hiérarchique
+
+La demande d'article suit le circuit séquentiel obligatoire suivant :
+
+1. Émission par le chercheur.
+2. Validation par le Chef de Laboratoire (Labo).
+3. Validation par le Chef d'Unité d'Enseignement et de Recherche (UER).
+4. Validation par le Chef de Bureau de la Recherche.
+5. Envoi et validation finale par le Conseil Scientifique de l'institut.
+
+
+E. Suivi Post-Autorisation, États Externes et Alertes
+
+Une fois l'autorisation de principe accordée par le Conseil et notifiée à l'auteur :
+
+1. Délai de Soumission Réelle :
+
+L'auteur dispose d'un délai maximal paramétrable D1, par exemple 30 jours, pour déclarer sur le système qu'il a effectivement soumis son article sur la plateforme de l'éditeur externe, avec preuve ou numéro de suivi.
+
+2. Mises à jour continuelles :
+
+L'auteur doit obligatoirement actualiser le statut de son article dans le système à chaque retour de l'éditeur, parmi les états suivants :
+
+Under Review — En cours d'évaluation
+
+Minor Revision — Révisions mineures
+
+Major Revision — Révisions majeures
+
+Accepted — Accepté
+
+Published — Publié définitivement — Fin du cycle
+
+Rejected — Rejeté définitivement — Fin du cycle
+
+3. Traitement automatique des anomalies (Background Service .NET) :
+
+Alerte Non-Soumission :
+
+Si l'auteur n'a pas déclaré sa soumission réelle après le délai D1 suivant l'autorisation du conseil.
+
+Alerte Stagnation :
+
+Si l'autorisation est accordée mais qu'après une certaine durée paramétrable D2, par exemple 6 mois, l'article reste bloqué dans un statut intermédiaire sans mise à jour ou sans publication effective.
+
+Ces anomalies sont remontées sur le tableau de bord du Chef de Bureau.
+
+
+Volet 2 : Suivi des Gradations Universitaires
+
+Ce module automatise les demandes d'avancement de grade ou de promotion des enseignants-chercheurs.
+
+Espace Demandeur :
+
+Saisie des informations professionnelles : grade actuel, grade visé, ancienneté, etc.
+
+Gestion Documentaire :
+
+Formulaire permettant de téléverser les pièces justificatives obligatoires : diplômes, rapports d'activités, attestations, liste des publications.
+
+Circuit de Validation :
+
+Le dossier suit rigoureusement le même circuit hiérarchique que les publications :
+
+Chef Labo → Chef UER → Chef Bureau → Conseil.
+
+Inscription Finale :
+
+Dès le retour de la décision officielle, la décision est inscrite dans la base de données et le nouveau grade de l'enseignant est définitivement mis à jour dans son profil système.
+
+
+Volet 3 : Inscription et Suivi des Projets de Recherche
+
+Ce module fait office de tableau de bord financier et opérationnel pour l'ensemble des projets de l'institut.
+
+Fiche d'Identité du Projet :
+
+Saisie du porteur de projet (Investigateur Principal), des membres de l'équipe (Co-chercheurs, doctorants), des objectifs scientifiques fixés et de la durée (Date de début et date de fin prévue).
+
+Suivi Budgétaire Strict :
+
+Saisie du budget global accordé.
+
+Saisie et ventilation des dépenses par catégorie : matériel, consommables, missions, etc.
+
+Calcul automatique en temps réel du reste à consommer :
+
+Budget Restant = Budget Global - Somme des Dépenses
+
+
+4. Profils Utilisateurs & Gestion des Droits (RBAC)
+
+L'accès aux fonctionnalités est segmenté selon les rôles suivants :
+
+1. Chercheur / Enseignant :
+
+Crée ses demandes d'articles avec aide de l'IA, sélectionne ou propose des journaux, dépose ses dossiers de gradation, met à jour ses statuts de publication et consulte ses projets.
+
+2. Chef de Laboratoire :
+
+Premier niveau de validation pour les volets 1 et 2. Il possède une vue globale sur les activités de son laboratoire.
+
+3. Chef UER :
+
+Deuxième niveau de validation. Il possède une vue sur son unité d'enseignement et de recherche.
+
+4. Chef de Bureau de la Recherche :
+
+Troisième niveau de validation.
+
+Il dispose du tableau de bord de pilotage consolidé, est alerté des anomalies et possède l'accès exclusif à l'interface de modération et de dédoublonnage des nouveaux journaux.
+
+5. Secrétariat du Conseil / Administrateur :
+
+Enregistre les décisions du Conseil et configure les paramètres du système :
+
+Valeur du nombre maximal de journaux à cibler.
+
+Délais des alertes D1 et D2.
+
+
+5. Spécifications Techniques & Base de Données
+
+Structure Conceptuelle Proposée (Tables SQL Server)
+
+Utilisateurs (Id, Nom, Prénom, Email, GradeActuel, RoleID, LaboID, UerID)
+
+Journaux (Id, Nom, Editeur, ISSN)
+
+Contient uniquement les journaux validés et officiels.
+
+DemandesPublication (Id, Titre, Abstract, AuteurId, StatutValidationInterne, DateAutorisationConseil, StatutEditeurCourant, DateDerniereMiseAJour)
+
+JournauxCiblesDemande (Id, DemandeId, JournalId [Nullable], NomJournalSaisiManuellement, IssnSaisiManuellement, EstNouveauJournal, OrdrePreference, StatutModeration [EnAttente, Fusionne, Cree])
+
+Permet de stocker les propositions temporaires des auteurs tant que le Chef de Bureau n'a pas fait la fusion.
+
+DossiersGradation (Id, EnseignantID, GradeVise, DateSoumission, StatutValidation)
+
+PiecesJustificatives (Id, DossierID, NomFichier, CheminStockageSecurise)
+
+ProjetsRecherche (Id, PorteurID, Titre, Objectifs, BudgetTotal, DateDebut, DateFin)
+
+DepensesProjet (Id, ProjetID, Montant, NatureDepense, DateDepense)
+
+
+Sécurité
+
+Authentification :
+
+Implémentation via ASP.NET Core Identity.
+
+Sécurisation des fichiers :
+
+Les pièces justificatives des gradations doivent être stockées hors du répertoire public wwwroot.
+
+L'accès au téléchargement doit être restreint par un contrôleur .NET vérifiant les habilitations de l'utilisateur connecté.
+
+
+6. Livrables Attendus
+
+1. Code Source :
+
+Solution .NET / Razor propre, respectant une architecture multicouche : Data, Business, Web.
+
+2. Script SQL :
+
+Fichier .sql complet de création de la base de données SQL Server avec clés primaires, clés étrangères et contraintes d'intégrité.
+
+3. Module IA Local :
+
+Composant ou micro-service intégré fonctionnel pour la suggestion de journaux à partir de l'abstract.
+
+4. Manuel Utilisateur :
+
+Guide décrivant les parcours selon les rôles :
+
+Chercheur
+
+Administrateur
+
+Validateurs
+
+Modérateur

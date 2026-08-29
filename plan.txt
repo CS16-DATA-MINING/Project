@@ -1,0 +1,1244 @@
+I'am islem
+MINI-PROJET · GESTION DES ACTIVITÉS DE RECHERCHE
+
+PLAN DE TRAVAIL DÉTAILLÉ — VOLET 1
+
+20 jours · travail séparé · charge équilibrée · priorité au back-end · ASP.NET Core MVC · vues MVC aidées par un LLM
+
+Ilyes : 63 h 15
+Islem : 63 h 30
+3 h à 3 h 30 / jour
+Aucune journée en commun
+
+
+1. RÉPARTITION SIMPLE ET ÉQUITABLE
+
+ILYÈS — Base, validation et surveillance MVC
+
+Crée la solution MVC et possède seul le dossier Data.
+
+Code le circuit Labo → UER → Bureau → Conseil.
+
+Code les rejets, l'historique et les contrôleurs associés.
+
+Code le robot D1/D2, les anomalies et le dashboard.
+
+Renforce la sécurité des contrôleurs, actions et services.
+
+
+ISLEM — Articles, journaux et administration MVC
+
+Code le dépôt et les règles des journaux ciblés.
+
+Code la détection et la fusion des propositions en doublon.
+
+Code la soumission réelle et le suivi éditeur.
+
+Code paramètres, labos, UERs, utilisateurs et rôles.
+
+Crée les contrôleurs, ViewModels, vues MVC et le manuel.
+
+
+IMPORTANT
+
+Aucun module IA n’est développé dans l’application.
+
+Le LLM sert uniquement d’outil de développement pour accélérer le visuel des vues MVC .cshtml.
+
+Les règles métier restent codées et testées dans les services ; les contrôleurs restent minces.
+
+
+2. COMMENT LIRE CHAQUE JOURNÉE
+
+Bloc : Ce qu'il signifie
+
+Objectif :
+Pourquoi la tâche est nécessaire dans le projet MVC.
+
+Étapes + minutes :
+Ordre exact des actions ; le total donne 3 h à 3 h 30.
+
+À livrer :
+Service, contrôleur, ViewModel, vue ou test attendu.
+
+Terminé si :
+Vérification concrète avant la pull request.
+
+
+3. RÈGLES POUR TRAVAILLER SANS RÉUNION
+
+Branche Ilyes :
+ilyes — Data, validation, alertes, dashboard et sécurité.
+
+Branche Islem :
+islem — articles, modération, suivi et admin.
+
+Chaque soir :
+Chacun pousse son code et écrit fait / demain / blocage dans JOURNAL.md.
+
+Chaque matin :
+Chacun récupère main, compile et continue.
+
+Toute modification Data est demandée à Ilyes.
+
+
+ARCHITECTURE DE TRAVAIL — ASP.NET CORE MVC
+
+Structure du projet et enchaînement
+
+Data pour la base, Business pour les règles, Web pour Contrôleurs + ViewModels + Vues MVC.
+
+
+STRUCTURE DE FICHIERS
+
+GestionRecherche/
+├── Data/ ← Ilyes uniquement
+│   ├── Entities/ ← tables SQL / EF Core
+│   ├── Configurations/ ← relations, contraintes, index
+│   ├── Migrations/ ← évolution de la base
+│   └── AppDbContext.cs
+│
+├── Business/ ← règles métier et tests
+│   ├── Interfaces/ ← contrats des services
+│   ├── ValidationService.cs ← Ilyes
+│   ├── RoutingService.cs ← Ilyes
+│   ├── AlerteService.cs ← Ilyes
+│   ├── DashboardService.cs ← Ilyes
+│   ├── DepotService.cs ← Islem
+│   ├── ModerationService.cs ← Islem
+│   ├── SuiviEditeurService.cs ← Islem
+│   └── AdminService.cs ← Islem
+│
+└── Web/ ← ASP.NET Core MVC
+    ├── Controllers/
+    │   ├── ValidationController.cs ← Ilyes
+    │   ├── AnomaliesController.cs ← Ilyes
+    │   ├── DashboardController.cs ← Ilyes
+    │   ├── DemandesController.cs ← Islem
+    │   ├── ModerationController.cs ← Islem
+    │   ├── SuiviEditeurController.cs ← Islem
+    │   └── AdminController.cs ← Islem
+    │
+    ├── ViewModels/ ← jamais les entités directement
+    └── Views/ ← vues MVC Razor .cshtml
+        ├── Validation/ & Dashboard/ ← Ilyes
+        ├── Demandes/ & SuiviEditeur/ ← Islem
+        ├── Moderation/ & Admin/ ← Islem
+        └── Shared/
+
+
+FLUX PRINCIPAL D'UNE DEMANDE
+
+Auteur
+→ dépose
+→ Chef Labo
+→ Chef UER
+→ Chef Bureau
+→ Conseil
+→ autorise
+→ Soumission réelle
+→ Under Review
+→ Révisions
+→ Accepté
+→ Publié
+
+ou
+
+Rejeté
+
+
+POINTS DE CONTACT ENTRE LES DEUX PARTIES
+
+Ilyes fournit :
+Entités, DbContext et migrations.
+
+Islem utilise :
+Services, contrôleurs et ViewModels utilisent les entités sans modifier Data.
+
+Ilyes fournit :
+Statut Autorisée et date Conseil.
+
+Islem utilise :
+Soumission réelle, modération et suivi éditeur deviennent disponibles.
+
+Islem fournit :
+Labos/UERs et leurs chefs.
+
+Ilyes utilise :
+RoutingService retrouve le bon validateur grâce à ces affectations.
+
+Islem fournit :
+Date de soumission et dernière mise à jour.
+
+Ilyes utilise :
+Le robot décide s’il faut créer une anomalie D1 ou D2.
+
+
+RÈGLE MVC
+
+Aucune logique métier importante dans les contrôleurs.
+
+Aucune entité EF envoyée directement aux vues.
+
+Pas de dossier Pages/ ni de PageModel.
+
+
+JOUR 1 — CRÉER LE SOCLE ASP.NET CORE MVC
+
+Ilyes ≈ 3 h 15
+
+Objectif :
+Mettre en place une solution .NET 8 MVC multicouche dans laquelle les deux parties pourront travailler sans mélanger les fichiers.
+
+30 min :
+Créer le dépôt Git, les branches ilyes et islem, puis ajouter JOURNAL.md.
+
+60 min :
+Créer GestionRecherche.sln et les projets Data, Business et Web avec le modèle MVC.
+
+Ajouter les références, AddControllersWithViews et la route conventionnelle.
+
+60 min :
+Installer ASP.NET Core Identity, configurer SQL Server et créer AccountController avec les vues MVC Connexion/Déconnexion, sans Razor Pages.
+
+45 min :
+Créer les rôles Chercheur, ChefLabo, ChefUER, ChefBureau, SecretariatConseil et Admin, puis tester un compte.
+
+À livrer :
+Solution MVC compilable, dépôt Git prêt et authentification fonctionnelle.
+
+Terminé si :
+L'application démarre et la connexion/déconnexion passe par un contrôleur et des vues MVC.
+
+
+JOUR 2 — INITIALISER LE MODÈLE MÉTIER
+
+Ilyes ≈ 3 h 15
+
+Objectif :
+Créer les entités et relations nécessaires au workflow de validation.
+
+30 min :
+Lister les entités nécessaires au volet 1 et vérifier les clés étrangères.
+
+60 min :
+Créer les entités de base : DemandePublication, Journal, JournalCibleDemande, EtapeValidation et Anomalie.
+
+60 min :
+Configurer les relations, contraintes et index dans Data.
+
+45 min :
+Créer la migration initiale et vérifier la création de la base SQL Server.
+
+À livrer :
+Modèle EF Core initial et migration fonctionnelle.
+
+Terminé si :
+La base peut être créée par migration et les relations principales sont correctes.
+
+
+Islem ≈ 3 h
+
+Objectif :
+Préparer les contrats métier pour le dépôt d'article et les journaux ciblés.
+
+45 min :
+Lire les entités et définir les besoins du dépôt sans modifier Data.
+
+60 min :
+Définir les DTO et interfaces nécessaires au dépôt.
+
+45 min :
+Définir les règles de validation des champs titre, abstract et journaux.
+
+30 min :
+Préparer les tests du dépôt.
+
+À livrer :
+Contrats du service de dépôt et tests de base.
+
+Terminé si :
+Le dépôt peut être décrit sans dépendre directement d'un contrôleur MVC.
+
+
+JOUR 3 — CRÉER LA VALIDATION MÉTIER ET LE DÉPÔT DE BASE
+
+Ilyes ≈ 3 h
+
+Objectif :
+Créer le service de validation métier avec traçabilité.
+
+30 min :
+Récupérer le script de test d'Islem, l'exécuter et vérifier la présence des demandes.
+
+75 min :
+Créer ValidationService avec Valider et Rejeter.
+
+Contrôler le niveau actuel avant toute action.
+
+45 min :
+À chaque action, écrire une ligne dans EtapesValidation avec personne, date, niveau, décision et commentaire.
+
+45 min :
+Tester validation normale, rejet, mauvais niveau et seconde validation interdite.
+
+À livrer :
+Service de validation métier fonctionnel et testé.
+
+Terminé si :
+Une validation modifie le statut et crée exactement une ligne d'historique.
+
+
+Islem ≈ 3 h 15
+
+Objectif :
+Créer correctement une demande d'article avec son auteur et son statut initial, sans mettre la logique dans le contrôleur.
+
+30 min :
+Récupérer main et lire les entités créées par Ilyes sans modifier le dossier Data.
+
+75 min :
+Créer DepotService, ses DTO d'entrée/sortie et une méthode recevant titre, abstract et utilisateur connecté.
+
+45 min :
+Valider les champs, affecter automatiquement auteur/date/statut initial et enregistrer la demande.
+
+45 min :
+Tester demande valide, titre vide, abstract vide et utilisateur inexistant.
+
+À livrer :
+Service de dépôt de base fonctionnel et testé.
+
+Terminé si :
+La demande créée contient le bon auteur, la bonne date et le statut initial prévu.
+
+
+JOUR 4 — AJOUTER LE ROUTAGE ET LE DÉPÔT MVC
+
+Ilyes ≈ 3 h 15
+
+Objectif :
+Déterminer automatiquement la personne autorisée à traiter chaque demande à chaque étape.
+
+45 min :
+Créer RoutingService et calculer le prochain niveau depuis le statut actuel.
+
+60 min :
+Pour Labo et UER, retrouver le chef de la structure de l'auteur ; pour Bureau et Conseil, retrouver le rôle attendu.
+
+45 min :
+Gérer auteur sans labo, structure sans chef et rôle manquant avec un résultat métier clair.
+
+45 min :
+Tester le routage avec plusieurs auteurs appartenant à des labos et UERs différents.
+
+À livrer :
+Service retournant le bon niveau et le bon validateur.
+
+Terminé si :
+Deux auteurs de labos différents sont routés vers deux responsables différents.
+
+
+Islem ≈ 3 h 30
+
+Objectif :
+Compléter les règles des journaux et exposer le dépôt par un vrai contrôleur MVC.
+
+45 min :
+Rechercher un journal existant et retourner ses informations en lecture seule.
+
+60 min :
+Gérer « nouveau journal » avec nom, éditeur et ISSN obligatoires sans créer directement un journal officiel.
+
+45 min :
+Lire le maximum depuis les paramètres et garantir l'unicité des ordres 1, 2 et 3.
+
+30 min :
+Enregistrer demande et journaux ciblés dans une transaction EF Core.
+
+30 min :
+Créer DemandesController.Create GET/POST, DepotViewModel et la vue Create.cshtml avec AntiForgery et ModelState.
+
+À livrer :
+Dépôt MVC complet avec journaux existants ou proposés.
+
+Terminé si :
+Un journal existant et un nouveau sont acceptés ; un quatrième journal est refusé.
+
+
+JOUR 5 — BRANCHER LE PREMIER NIVEAU ET AFFICHER LES DEMANDES
+
+Ilyes ≈ 3 h
+
+Objectif :
+Faire fonctionner la première étape de validation dans MVC.
+
+45 min :
+Créer la file des demandes du Chef de Laboratoire selon son laboratoire.
+
+60 min :
+Ajouter les actions GET/POST de validation et de rejet.
+
+45 min :
+Créer les ViewModels de validation avec commentaire obligatoire en cas de rejet.
+
+45 min :
+Créer les vues MVC de liste et de détail.
+
+À livrer :
+Premier niveau de validation MVC.
+
+Terminé si :
+Le Chef de Laboratoire ne voit que les demandes de son laboratoire et peut valider ou rejeter.
+
+
+Islem ≈ 3 h 15
+
+Objectif :
+Permettre à l'auteur de retrouver et consulter ses demandes.
+
+45 min :
+Créer les requêtes « Mes demandes » filtrées par utilisateur connecté.
+
+60 min :
+Créer DemandesController pour la liste et le détail.
+
+45 min :
+Créer MesDemandesViewModel et DemandeDetailsViewModel.
+
+45 min :
+Créer les vues MesDemandes.cshtml et Details.cshtml avec les statuts et messages d'erreur.
+
+À livrer :
+Parcours auteur : liste et détail des demandes.
+
+Terminé si :
+Un auteur ne peut consulter que ses propres demandes.
+
+
+JOUR 6 — AJOUTER UER/BUREAU ET PRÉPARER LA MODÉRATION
+
+Ilyes ≈ 3 h 15
+
+Objectif :
+Réutiliser le même contrôleur et le même service pour UER et Bureau sans dupliquer les règles.
+
+45 min :
+Ajouter la file du Chef UER selon l'UER de l'auteur.
+
+45 min :
+Ajouter la file du Chef de Bureau pour les demandes validées par l'UER.
+
+45 min :
+Réutiliser les actions et vues de ValidationController en adaptant seulement le niveau attendu.
+
+60 min :
+Tester le parcours Labo → UER → Bureau avec plusieurs structures et corriger les autorisations.
+
+À livrer :
+Niveaux Labo, UER et Bureau servis par un seul moteur MVC.
+
+Terminé si :
+Après validation Labo, la demande apparaît uniquement au bon Chef UER.
+
+
+Islem ≈ 3 h 30
+
+Objectif :
+Présenter au Chef de Bureau les nouveaux journaux qui pourraient être des doublons.
+
+45 min :
+Récupérer uniquement les propositions au statut En attente de modération.
+
+60 min :
+Normaliser ISSN et noms : espaces, ponctuation et différences majuscules/minuscules.
+
+45 min :
+Former les groupes de doublons potentiels : même ISSN ou noms très proches.
+
+60 min :
+Tester plusieurs variantes d’un même journal et vérifier les groupes retournés.
+
+À livrer :
+Liste structurée des propositions et groupes de doublons potentiels.
+
+Terminé si :
+Les variantes « IEEE Trans on AI » et « IEEE Transactions on AI » apparaissent dans le même groupe.
+
+
+JOUR 7 — FINALISER LE CONSEIL ET LA FUSION TRANSACTIONNELLE
+
+Ilyes ≈ 3 h
+
+Objectif :
+Terminer le circuit interne et démarrer correctement le délai D1.
+
+45 min :
+Ajouter la file et les actions du Conseil pour le rôle SecretariatConseil.
+
+45 min :
+À la décision finale, remplir DateAutorisationConseil et passer la demande à Autorisée.
+
+45 min :
+Passer toute proposition de nouveau journal à En attente de modération sans bloquer l'autorisation.
+
+45 min :
+Tester validation finale, rejet Conseil et demande contenant un nouveau journal.
+
+À livrer :
+Circuit Labo → UER → Bureau → Conseil terminé.
+
+Terminé si :
+La décision Conseil remplit la date d'autorisation sans créer automatiquement le journal.
+
+
+Islem ≈ 3 h 30
+
+Objectif :
+Fusionner plusieurs propositions vers un seul journal officiel sans laisser de données incohérentes.
+
+45 min :
+Recevoir le groupe choisi et les informations officielles retenues par le Chef de Bureau.
+
+60 min :
+Démarrer une transaction EF Core, créer ou retrouver le journal officiel et contrôler l’ISSN unique.
+
+60 min :
+Relier toutes les lignes JournauxCiblesDemande au journal officiel et marquer Créé/Fusionné.
+
+45 min :
+Provoquer une erreur au milieu et vérifier le retour arrière complet.
+
+À livrer :
+Service de fusion atomique et testé.
+
+Terminé si :
+Après fusion, un seul journal officiel subsiste et toutes les demandes pointent vers lui.
+
+
+JOUR 8 — GÉRER LE REJET ET BRANCHER LA MODÉRATION MVC
+
+Ilyes ≈ 3 h
+
+Objectif :
+Rendre le rejet compréhensible et traçable dans l'interface MVC.
+
+45 min :
+Refuser tout rejet sans commentaire et enregistrer le niveau concerné.
+
+45 min :
+Passer la demande à Rejetée et définir la règle de correction/résoumission.
+
+45 min :
+Créer la requête d'historique triée avec niveau, décision, personne et commentaire.
+
+45 min :
+Afficher l'historique dans la vue Détail et tester un rejet à chacun des quatre niveaux.
+
+À livrer :
+Rejet complet avec motif et historique visible.
+
+Terminé si :
+Le POST sans commentaire échoue ; avec commentaire, la décision apparaît dans le détail auteur.
+
+
+Islem ≈ 3 h
+
+Objectif :
+Permettre au Chef de Bureau d’utiliser le service de fusion depuis une interface MVC simple.
+
+45 min :
+Créer ModerationController, ses actions GET/POST et ses ViewModels.
+
+45 min :
+Créer la vue des groupes à gauche et les détails comparés à droite.
+
+45 min :
+Ajouter la sélection de la version officielle et une confirmation avant fusion.
+
+45 min :
+Brancher l’action au service de fusion et tester autorisations, AntiForgery et erreurs.
+
+À livrer :
+Interface MVC de modération utilisable par le Chef de Bureau.
+
+Terminé si :
+Une fusion exécutée depuis la vue met correctement la base et les demandes à jour.
+
+
+JOUR 9 — TESTER LES DEUX GRANDES PARTIES
+
+Ilyes ≈ 3 h 30
+
+Objectif :
+Vérifier que le circuit de validation MVC résiste aux cas normaux et interdits.
+
+60 min :
+Tester le scénario complet : dépôt puis quatre validations dans l'ordre.
+
+60 min :
+Tester un rejet à chaque niveau et une nouvelle soumission si elle est autorisée.
+
+60 min :
+Tester mauvais rôle, demande déjà traitée, autre structure, chef manquant et POST sans AntiForgery.
+
+30 min :
+Corriger les bugs bloquants et noter les autres dans JOURNAL.md.
+
+À livrer :
+Circuit MVC validé par des scénarios d'intégration.
+
+Terminé si :
+Tous les parcours principaux passent et les accès interdits sont réellement bloqués.
+
+
+Islem ≈ 3 h 15
+
+Objectif :
+Vérifier que le dépôt et la fusion ne créent ni doublon ni demande incomplète.
+
+60 min :
+Tester journaux existants/nouveaux, ordre incorrect, limite dépassée et erreurs ModelState.
+
+60 min :
+Tester deux auteurs proposant le même journal avec des écritures différentes puis les fusionner.
+
+45 min :
+Tester ISSN existant, fusion invalide et rollback transactionnel.
+
+30 min :
+Améliorer les messages d’erreur des vues MVC et corriger les bugs bloquants.
+
+À livrer :
+Dépôt et modération stables après les tests métier.
+
+Terminé si :
+Aucun test ne laisse de demande partielle ni plusieurs journaux officiels identiques.
+
+
+JOUR 10 — FAIRE LE CONTRÔLE À MI-PARCOURS, SÉPARÉMENT
+
+Ilyes ≈ 3 h
+
+Objectif :
+Stabiliser la branche principale et mesurer l'avancement réel de la partie validation MVC.
+
+45 min :
+Relire les pull requests, fusionner celles qui compilent et documenter les autres.
+
+45 min :
+Recréer la base par migrations puis exécuter les données de test.
+
+45 min :
+Tester sur main les routes, actions, vues et droits du circuit complet.
+
+45 min :
+Écrire terminé / restant / bugs et décider si le Plan B doit être activé.
+
+À livrer :
+Branche main compilable et bilan écrit de mi-parcours.
+
+Terminé si :
+Une autre machine clone, migre et démarre l'application avec le README.
+
+
+Islem ≈ 3 h
+
+Objectif :
+Tester sur main la partie auteur et modération sans travailler en même temps qu'Ilyes.
+
+45 min :
+Récupérer main après Ilyes et vérifier compilation et démarrage.
+
+45 min :
+Tester dépôt, Mes demandes, détail, proposition de journal et modération.
+
+45 min :
+Noter chaque défaut avec route, action, rôle, résultat attendu et résultat obtenu.
+
+45 min :
+Corriger uniquement les dossiers appartenant à Islem et ouvrir une pull request.
+
+À livrer :
+Rapport de test MVC et corrections de la partie Islem.
+
+Terminé si :
+Le parcours auteur fonctionne sur main sans changement local caché.
+
+
+JOUR 11 — DÉMARRER LES ALERTES ET LE SUIVI EXTERNE
+
+Ilyes ≈ 3 h 15
+
+Objectif :
+Créer le service automatique qui vérifie quotidiennement les retards.
+
+45 min :
+Créer un BackgroundService .NET avec fréquence configurable.
+
+60 min :
+Relire D1 et D2 depuis ParametresSysteme à chaque exécution.
+
+45 min :
+Journaliser début, demandes examinées, anomalies créées et erreurs.
+
+45 min :
+Ajouter une action POST Admin « Lancer maintenant » avec autorisation et AntiForgery.
+
+À livrer :
+Robot planifié et déclenchable via un contrôleur MVC.
+
+Terminé si :
+Le déclenchement manuel produit les logs attendus sans fausse anomalie.
+
+
+Islem ≈ 3 h
+
+Objectif :
+Permettre à l'auteur de déclarer la soumission réelle avec preuve ou numéro de suivi.
+
+45 min :
+Créer la méthode métier recevant date, numéro de suivi et référence de preuve pour une demande autorisée.
+
+60 min :
+Créer SuiviEditeurController GET/POST et la vue MVC de déclaration.
+
+45 min :
+Stocker la preuve hors wwwroot et créer une action de téléchargement qui vérifie auteur ou rôle habilité.
+
+30 min :
+Tester auteur correct, autre auteur, demande non autorisée, date invalide et fichier interdit.
+
+À livrer :
+Déclaration de soumission réelle MVC, sécurisée et traçable.
+
+Terminé si :
+Date, suivi et éventuelle preuve sont enregistrés ; le téléchargement non autorisé est refusé.
+
+
+JOUR 12 — DÉTECTER D1 ET ENREGISTRER LES STATUTS ÉDITEUR
+
+Ilyes ≈ 3 h
+
+Objectif :
+Créer une anomalie lorsqu'un article autorisé n'est pas soumis dans le délai D1.
+
+45 min :
+Rechercher autorisation présente, aucune soumission réelle et délai D1 dépassé.
+
+60 min :
+Créer l'anomalie NonSoumission avec jours de retard et message explicite.
+
+45 min :
+Empêcher le doublon si une anomalie ouverte du même type existe déjà.
+
+30 min :
+Tester demande à temps, en retard et deux exécutions successives.
+
+À livrer :
+Détection D1 exacte et idempotente.
+
+Terminé si :
+Deux passages du robot laissent une seule anomalie ouverte par demande.
+
+
+Islem ≈ 3 h
+
+Objectif :
+Enregistrer chaque retour éditeur sans perdre l'historique.
+
+45 min :
+Définir les statuts autorisés : Under Review, Minor/Major Revision, Accepted, Published, Rejected.
+
+60 min :
+Mettre à jour statut courant et date, puis ajouter l'historique dans la même transaction.
+
+45 min :
+Créer les actions GET/POST MVC de mise à jour et afficher les erreurs dans ModelState.
+
+30 min :
+Tester statut valide, inconnu et trois changements successifs.
+
+À livrer :
+Suivi des statuts éditeur par service, contrôleur et historique.
+
+Terminé si :
+Le dernier statut est affiché et chaque changement possède sa ligne d'historique.
+
+
+JOUR 13 — DÉTECTER D2 ET AFFICHER LA CHRONOLOGIE MVC
+
+Ilyes ≈ 3 h
+
+Objectif :
+Signaler les articles sans évolution depuis le délai D2.
+
+45 min :
+Interroger DateDerniereMiseAJour et exclure Published et Rejected.
+
+60 min :
+Créer l'anomalie Stagnation avec statut actuel et durée sans mise à jour.
+
+45 min :
+Réutiliser l'anti-doublon et exclure les articles récemment actualisés.
+
+30 min :
+Tester récent, limite D2, retard, publié et rejeté.
+
+À livrer :
+Détection D2 correcte pour les statuts intermédiaires.
+
+Terminé si :
+Seuls les articles réellement stagnants produisent une anomalie.
+
+
+Islem ≈ 3 h
+
+Objectif :
+Donner à l'auteur une lecture claire de toute la vie externe de l'article.
+
+45 min :
+Créer la requête d'historique triée du plus ancien au plus récent.
+
+60 min :
+Créer l'action Historique, son ViewModel et une frise dans Historique.cshtml.
+
+45 min :
+Afficher Publié en vert et Rejeté en rouge, puis interdire toute nouvelle mise à jour terminale.
+
+30 min :
+Tester chronologie vide, longue et deux fins de cycle.
+
+À livrer :
+Vue MVC « Suivi de mon article » avec chronologie fiable.
+
+Terminé si :
+L'ordre des dates est exact et un statut terminal bloque tout nouveau POST.
+
+
+JOUR 14 — TRAITER LES ANOMALIES ET CONFIGURER LES DÉLAIS
+
+Ilyes ≈ 3 h 15
+
+Objectif :
+Permettre au Chef de Bureau de consulter et clôturer une anomalie en gardant une trace.
+
+60 min :
+Créer la requête des anomalies ouvertes avec demande, auteur, type, date et message.
+
+45 min :
+Créer l'action métier Marquer traitée avec date, Chef de Bureau et commentaire obligatoire.
+
+45 min :
+Créer AnomaliesController et les vues avec filtres par type et laboratoire.
+
+45 min :
+Tester accès Bureau, refus Chercheur et traitement d'une anomalie déjà fermée.
+
+À livrer :
+Tableau MVC des anomalies avec traitement traçable.
+
+Terminé si :
+Une anomalie fermée quitte la liste ouverte mais reste dans l'historique.
+
+
+Islem ≈ 3 h
+
+Objectif :
+Permettre à l'administrateur de modifier les règles sans changer le code.
+
+45 min :
+Créer les méthodes de lecture/mise à jour pour MaxJournaux, D1 et D2.
+
+60 min :
+Valider nombres positifs, limites raisonnables et liste blanche de clés.
+
+45 min :
+Créer les actions MVC Paramètres et la vue affichant valeur actuelle, nouvelle valeur et description.
+
+30 min :
+Modifier D1 puis lancer le robot pour vérifier la prise en compte immédiate.
+
+À livrer :
+Écran MVC de paramètres sécurisé et pris en compte à chaud.
+
+Terminé si :
+Changer D1 modifie le prochain passage sans redémarrage.
+
+
+JOUR 15 — AJOUTER LES STATISTIQUES ET GÉRER LES STRUCTURES
+
+Ilyes ≈ 3 h
+
+Objectif :
+Donner au Chef de Bureau une vue fiable de l'état des publications.
+
+45 min :
+Compter les demandes par statut interne et statut éditeur.
+
+60 min :
+Regrouper par laboratoire et compter les anomalies ouvertes/traitées.
+
+45 min :
+Créer DashboardController, son ViewModel, la vue de cartes et le badge du menu.
+
+30 min :
+Comparer les nombres affichés avec des requêtes SQL sur les données de test.
+
+À livrer :
+Tableau de bord MVC avec indicateurs fiables.
+
+Terminé si :
+Chaque nombre affiché correspond exactement à la base.
+
+
+Islem ≈ 3 h 15
+
+Objectif :
+Administrer les labos et UERs utilisés par le routage.
+
+60 min :
+Créer les opérations métier Ajouter, Modifier et Archiver pour labos et UERs.
+
+60 min :
+Créer les actions MVC CRUD, affecter un chef ayant le bon rôle et empêcher une structure active sans chef.
+
+45 min :
+Créer les vues Index/Create/Edit avec validation et rôle Admin.
+
+30 min :
+Changer un chef et vérifier que le routage utilise la nouvelle affectation.
+
+À livrer :
+Gestion MVC complète des labos/UERs et de leurs chefs.
+
+Terminé si :
+Une nouvelle demande est routée vers le nouveau chef.
+
+
+JOUR 16 — RENFORCER LA SÉCURITÉ ET ADMINISTRER LES COMPTES
+
+Ilyes ≈ 3 h 15
+
+Objectif :
+Bloquer les accès interdits au niveau des contrôleurs et des services.
+
+45 min :
+Ajouter politiques et attributs [Authorize] sur contrôleurs/actions Validation, Conseil, Anomalies et Admin.
+
+60 min :
+Contrôler dans les services le rôle, la structure et l'affectation réelle de la demande.
+
+45 min :
+Tester accès direct URL, POST forgé, identifiant d'un autre labo et jeton AntiForgery absent.
+
+45 min :
+Retourner Accès refusé ou Introuvable sans révéler de donnée privée.
+
+À livrer :
+Sécurité MVC et métier vérifiée en profondeur.
+
+Terminé si :
+Un Chercheur ne lit ni ne déclenche une validation, même par requête manuelle.
+
+
+Islem ≈ 3 h 15
+
+Objectif :
+Permettre à l'administrateur de créer et organiser les comptes du workflow.
+
+60 min :
+Créer un compte avec email unique, mot de passe temporaire et profil métier.
+
+60 min :
+Affecter rôles, laboratoire et UER avec contrôles de cohérence.
+
+45 min :
+Ajouter Désactiver/Réactiver sans supprimer l'historique.
+
+30 min :
+Créer/tester le contrôleur et les vues MVC : création, doublon, affectation et désactivation.
+
+À livrer :
+Gestion MVC des utilisateurs, rôles et affectations.
+
+Terminé si :
+Un compte désactivé ne se connecte plus mais ses anciennes décisions restent visibles.
+
+
+JOUR 17 — FAIRE UNE REVUE DE CODE ASYNCHRONE
+
+Ilyes ≈ 3 h
+
+Objectif :
+Contrôler la partie Islem et corriger les remarques reçues sans réunion.
+
+45 min :
+Récupérer la branche Islem et lancer compilation + tests avant lecture.
+
+60 min :
+Relire services, contrôleurs, ViewModels et vues : transactions, autorisations, ModelState et duplication.
+
+45 min :
+Écrire des remarques numérotées avec fichier, action/ligne, problème et correction proposée.
+
+30 min :
+Lire les remarques sur la partie Ilyes et corriger les blocages prioritaires.
+
+À livrer :
+Revue écrite exploitable et premiers correctifs.
+
+Terminé si :
+Chaque remarque localise le problème et indique comment le reproduire.
+
+
+Islem ≈ 3 h
+
+Objectif :
+Contrôler la partie Ilyes et corriger les remarques reçues sans réunion.
+
+45 min :
+Récupérer la branche Ilyes et lancer compilation + tests.
+
+60 min :
+Relire validation, routage, alertes, dashboard et sécurité MVC : rôles, statuts, dates et POST.
+
+45 min :
+Écrire les remarques numérotées dans JOURNAL.md avec étapes de reproduction.
+
+30 min :
+Corriger les problèmes bloquants de sa partie et améliorer les messages français.
+
+À livrer :
+Revue croisée écrite et correctifs vérifiés.
+
+Terminé si :
+Compilation et tests concernés passent avant fermeture d'une remarque.
+
+
+JOUR 18 — TESTER LES PARCOURS COMPLETS
+
+Ilyes ≈ 3 h 30
+
+Objectif :
+Tester validation, alertes et dashboard comme un vrai utilisateur MVC.
+
+60 min :
+Exécuter le parcours réussi avec quatre comptes validateurs dans le bon ordre.
+
+60 min :
+Exécuter rejets, accès refusés, demande déjà traitée et autre structure.
+
+60 min :
+Simuler D1/D2, lancer le robot, traiter une anomalie et vérifier l'historique.
+
+30 min :
+Classer les bugs et corriger immédiatement les bloquants.
+
+À livrer :
+Rapport de test validation/anomalies MVC.
+
+Terminé si :
+Chaque fonction principale possède au moins un succès et une erreur testés.
+
+
+Islem ≈ 3 h 30
+
+Objectif :
+Tester les parcours auteur et administrateur puis commencer le manuel.
+
+60 min :
+Tester dépôt, choix des journaux, Mes demandes, suivi et statuts éditeur.
+
+60 min :
+Tester modération, paramètres, structures et comptes avec les bons rôles.
+
+60 min :
+Prendre des captures MVC propres et rédiger le manuel en distinguant contrôleurs et écrans.
+
+30 min :
+Classer les bugs et corriger ceux qui empêchent un parcours.
+
+À livrer :
+Rapport auteur/admin et première version du manuel.
+
+Terminé si :
+Une personne externe suit les captures sans demander où cliquer.
+
+
+JOUR 19 — FAIRE LES TESTS CROISÉS ET CORRIGER
+
+Ilyes ≈ 3 h
+
+Objectif :
+Tester la partie Islem avec un regard neuf et stabiliser les modules d'Ilyes.
+
+60 min :
+Tester dépôt et suivi avec données normales/incorrectes sans lire d'abord les tests d'Islem.
+
+60 min :
+Tester fusion et administration, puis noter les bugs avec route et captures.
+
+60 min :
+Corriger les blocages trouvés par Islem dans validation, alertes ou dashboard et relancer les tests.
+
+À livrer :
+Liste de bugs croisés et correctifs Ilyes intégrés.
+
+Terminé si :
+Aucun bug bloquant attribué à Ilyes ne reste ouvert.
+
+
+Islem ≈ 3 h
+
+Objectif :
+Tester la partie Ilyes avec un regard neuf et stabiliser les modules d'Islem.
+
+60 min :
+Tester les quatre niveaux MVC et les droits avec des rôles incorrects.
+
+60 min :
+Tester D1/D2 et dashboard avec des dates préparées spécialement.
+
+60 min :
+Corriger les blocages trouvés par Ilyes dans dépôt, modération ou admin et relancer les tests.
+
+À livrer :
+Liste de bugs croisés et correctifs Islem intégrés.
+
+Terminé si :
+Aucun bug bloquant attribué à Islem ne reste ouvert.
+
+
+JOUR 20 — PRÉPARER LA LIVRAISON ET LA DÉMONSTRATION
+
+Ilyes ≈ 3 h
+
+Objectif :
+Produire une version MVC installable et reproductible.
+
+45 min :
+Fusionner les dernières pull requests, lancer tous les tests et produire le build Release.
+
+60 min :
+Recréer la base, charger les données de démonstration et vérifier comptes/rôles.
+
+45 min :
+Tester sur la machine de présentation : connexion MVC, validation, robot manuel et dashboard.
+
+30 min :
+Écrire les commandes exactes d'installation, migration et démarrage dans le README.
+
+À livrer :
+Build Release MVC, base de démo et instructions d'installation.
+
+Terminé si :
+Après suppression locale, l'application redémarre en suivant uniquement le README.
+
+
+Islem ≈ 3 h
+
+Objectif :
+Finaliser la documentation et préparer une démonstration indépendante de la partie Islem.
+
+60 min :
+Terminer le manuel auteur, modérateur et administrateur avec captures et erreurs courantes.
+
+60 min :
+Préparer la démo : dépôt, nouveau journal, fusion, suivi éditeur, paramètres et compte.
+
+30 min :
+Créer des captures de secours au cas où une vue ne fonctionne pas pendant la présentation.
+
+30 min :
+Vérifier que le code, le SQL et le manuel sont présents dans le dossier final.
+
+À livrer :
+Manuel final et scénario de démonstration MVC prêt.
+
+Terminé si :
+La partie Islem se démontre en moins de 8 minutes, sans aide extérieure.
+
+
+CONTRÔLE FINAL — ASP.NET CORE MVC
+
+Plan B, livrables et critères de réussite
+
+Cette page sert de checklist au J10 puis au J20.
+
+
+Plan B — seulement si le retard dépasse deux jours au J10
+
+Conserver les notifications dans l'application ; aucun système d'email avancé.
+
+Pour les doublons, garder ISSN exact + nom normalisé ; la distance floue devient un bonus.
+
+Afficher des compteurs simples au dashboard ; aucun graphique complexe.
+
+Afficher le statut éditeur actuel + date ; la frise avancée devient un bonus.
+
+Ne jamais supprimer MVC, les règles métier ni la sécurité.
+
+
+Le volet 1 est réellement terminé si…
+
+Le projet utilise Controllers + Actions + ViewModels + Views .cshtml, sans Razor Pages.
+
+Une demande traverse Labo → UER → Bureau → Conseil dans le bon ordre.
+
+Chaque décision laisse une trace avec personne, date, niveau et commentaire.
+
+Deux propositions équivalentes fusionnent en un seul journal officiel.
+
+L'auteur déclare la soumission avec preuve/numéro et met à jour les statuts éditeur.
+
+Le robot crée D1/D2 sans doublon et le Bureau peut traiter l'anomalie.
+
+L'admin gère délais, structures, comptes et rôles via MVC.
+
+Accès directs URL, POST forgés et téléchargements non autorisés sont bloqués.
+
+Base recréable, tests principaux, manuel et README sont présents.
+
+
+LIVRABLES FINAUX PAR PERSONNE
+
+Ilyes
+
+Validation et surveillance MVC.
+
+Solution, Data, migrations et README.
+
+Validation, routage, rejet et historique.
+
+Contrôleurs/vues Validation, Conseil et Anomalies.
+
+Robot D1/D2, dashboard, sécurité et Release.
+
+
+Islem
+
+Articles et administration MVC.
+
+Dépôt et journaux ciblés.
+
+Modération et fusion transactionnelle.
+
+Soumission réelle, suivi éditeur et preuve.
+
+Contrôleurs/vues Admin, données et manuel.
+
+
+PRÉSENTATION SÉPARÉE
+
+Ilyes · 1 :
+Montrer les quatre validations MVC et un rejet.
+
+Ilyes · 2 :
+Lancer le robot et traiter une anomalie.
+
+Islem · 1 :
+Déposer une demande puis fusionner deux journaux.
+
+Islem · 2 :
+Montrer suivi éditeur, preuve et administration.
