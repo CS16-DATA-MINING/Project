@@ -1,0 +1,23 @@
+@model GestionRecherche.Web.DemandeDetailsViewModel
+
+@{
+    ViewData["Title"] = "Détails de la demande";
+}
+
+<h2>@Model.Titre</h2>
+<p>@Model.Abstract</p>
+<p>Auteur: @Model.AuteurNomComplet</p>
+<p>Statut: @Model.Statut</p>
+
+<h3>Journaux proposés</h3>
+<ul>
+@foreach(var j in Model.Journaux)
+{
+    <li>@j.Nom (@j.Issn) @if(j.EstNouveauJournal){<span>— Nouveau</span>}</li>
+}
+</ul>
+
+<div class="mt-3">
+    <a asp-controller="SuiviEditeur" asp-action="Declare" asp-route-demandeId="@Model.Id" class="btn btn-success">Déclarer la soumission réelle</a>
+    <a asp-controller="Validation" asp-action="Index" class="btn btn-secondary">Retour aux validations</a>
+</div>

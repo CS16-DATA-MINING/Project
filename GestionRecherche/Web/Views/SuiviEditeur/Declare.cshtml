@@ -1,0 +1,20 @@
+@model GestionRecherche.Web.DeclareSubmissionViewModel
+
+@{
+    ViewData["Title"] = "Déclarer la soumission réelle";
+}
+
+<h2>Déclarer la soumission pour la demande @Model.DemandeId</h2>
+
+<form asp-action="Declare" method="post">
+    <input type="hidden" asp-for="DemandeId" />
+    <div>
+        <label>Date de soumission</label>
+        <input asp-for="DateSoumission" type="datetime" />
+    </div>
+    <div>
+        <label>Numéro de suivi (optionnel)</label>
+        <input asp-for="NumeroSuivi" />
+    </div>
+    <button type="submit">Enregistrer</button>
+</form>

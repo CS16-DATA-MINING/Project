@@ -1,0 +1,23 @@
+@model GestionRecherche.Web.ModerationGroupViewModel
+
+@{
+    ViewData["Title"] = "Groupe de propositions";
+}
+
+<h2>Groupe @Model.GroupId</h2>
+
+<form asp-action="Merge" method="post">
+    <input type="hidden" name="GroupId" value="@Model.GroupId" />
+    <ul>
+    @foreach(var c in Model.Candidates)
+    {
+        <li>
+            <label>
+                <input type="radio" name="SelectedCandidateId" value="@c.CandidateId" />
+                @c.Nom (@c.Issn) — proposé par demande @c.DemandeId
+            </label>
+        </li>
+    }
+    </ul>
+    <button type="submit">Fusionner vers la version sélectionnée</button>
+</form>

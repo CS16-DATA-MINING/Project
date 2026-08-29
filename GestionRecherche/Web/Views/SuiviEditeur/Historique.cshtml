@@ -1,0 +1,14 @@
+@model GestionRecherche.Web.HistoriqueViewModel
+
+@{
+    ViewData["Title"] = "Historique de la demande";
+}
+
+<h2>Historique demande @Model.DemandeId</h2>
+
+<ul>
+@foreach(var it in Model.Items)
+{
+    <li>@it.DateUtc - @it.Statut - @it.Details</li>
+}
+</ul>

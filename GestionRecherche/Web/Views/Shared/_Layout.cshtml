@@ -15,7 +15,7 @@
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">GestionRecherche.Web</a>
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">GestionRecherche</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
@@ -56,61 +56,41 @@
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                         </li>
                     </ul>
-                    <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-    <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-    <ul class="navbar-nav flex-grow-1">
-        <li class="nav-item">
-            <a class="nav-link text-dark"
-               asp-controller="Home"
-               asp-action="Index">
-                Accueil
-            </a>
-        </li>
-
-        @if (User.IsInRole("ChefBureau"))
-        {
-            <li class="nav-item">
-                <a class="nav-link text-dark"
-                   asp-controller="Dashboard"
-                   asp-action="Index">
-                    Tableau de bord
-                </a>
-            </li>
-
-            <li class="nav-item">
-                <a class="nav-link text-dark"
-                   asp-controller="Anomalies"
-                   asp-action="Index">
-                    Anomalies
-                    <vc:anomalies-badge></vc:anomalies-badge>
-                </a>
-            </li>
-        }
-
-        @if (User.IsInRole("Admin"))
-        {
-            <li class="nav-item">
-                <a class="nav-link text-dark"
-                   asp-controller="Admin"
-                   asp-action="Index">
-                    Robot alertes
-                </a>
-            </li>
-        }
-    </ul>
-
-    
-
-    <partial name="_LoginPartial" />
-</div>
+                    <partial name="_LoginPartial" />
+                </div>
                 </div>
             </div>
         </nav>
     </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
+    <div class="container-fluid">
+        <div class="row">
+            <nav id="sidebar" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
+                <div class="position-sticky pt-3">
+                    <ul class="nav flex-column">
+                        <li class="nav-item"><a class="nav-link" asp-controller="Home" asp-action="Index">Accueil</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-controller="Demandes" asp-action="Create">Créer une demande</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-controller="Demandes" asp-action="MesDemandes">Mes demandes</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-controller="Validation" asp-action="Index">Demandes à valider</a></li>
+                        @if (User.IsInRole("ChefBureau"))
+                        {
+                            <li class="nav-item"><a class="nav-link" asp-controller="Moderation" asp-action="Index">Modération des journaux</a></li>
+                            <li class="nav-item"><a class="nav-link" asp-controller="Dashboard" asp-action="Index">Tableau de bord</a></li>
+                            <li class="nav-item"><a class="nav-link" asp-controller="Anomalies" asp-action="Index">Anomalies</a></li>
+                        }
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <li class="nav-item"><a class="nav-link" asp-controller="Admin" asp-action="Index">Paramètres / Robot</a></li>
+                        }
+                    </ul>
+                </div>
+            </nav>
+
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+                <div class="pt-3">
+                    @RenderBody()
+                </div>
+            </main>
+        </div>
     </div>
 
     <footer class="border-top footer text-muted">

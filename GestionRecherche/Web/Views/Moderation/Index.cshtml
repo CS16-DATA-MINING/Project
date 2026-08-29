@@ -1,0 +1,17 @@
+@model GestionRecherche.Web.ModerationIndexViewModel
+
+@{
+    ViewData["Title"] = "Modération des journaux";
+}
+
+<h2>Propositions en attente</h2>
+
+<ul>
+@foreach(var g in Model.Groups)
+{
+    <li>
+        <a asp-action="Group" asp-route-id="@g.GroupId">@g.RepresentativeTitle</a>
+        (@g.Count propositions)
+    </li>
+}
+</ul>

@@ -1,0 +1,25 @@
+@model GestionRecherche.Web.MesDemandesViewModel
+
+@{
+    ViewData["Title"] = "Mes demandes";
+}
+
+<h2>Mes demandes</h2>
+
+<table>
+    <thead>
+        <tr><th>Id</th><th>Titre</th><th>Statut</th><th>Date</th><th></th></tr>
+    </thead>
+    <tbody>
+    @foreach(var d in Model.MesDemandes)
+    {
+        <tr>
+            <td>@d.Id</td>
+            <td>@d.Titre</td>
+            <td>@d.Statut</td>
+            <td>@d.DateCreationUtc</td>
+            <td><a asp-action="Details" asp-route-id="@d.Id">Détails</a></td>
+        </tr>
+    }
+    </tbody>
+</table>

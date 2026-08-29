@@ -1,0 +1,22 @@
+@model GestionRecherche.Web.DepotViewModel
+
+@{
+    ViewData["Title"] = "Créer une demande";
+}
+
+<h2>Créer une demande</h2>
+
+<form asp-action="Create" method="post">
+    <div>
+        <label>Titre</label>
+        <input asp-for="Titre" />
+        <span asp-validation-for="Titre"></span>
+    </div>
+    <div>
+        <label>Abstract</label>
+        <textarea asp-for="Abstract"></textarea>
+        <span asp-validation-for="Abstract"></span>
+    </div>
+
+    <button type="submit">Soumettre</button>
+</form>
